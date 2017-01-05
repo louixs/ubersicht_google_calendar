@@ -46,5 +46,5 @@ https://github.com/ShellShoccar-jpn/Parsrs/blob/master/parsrj.sh
 ## Disclaimer:
 This widget especially the oauth.sh is still at beta stage. Please use at your own risk. I would also highly appreciate constructive feedback. Many thanks.
 
-## To-do
+## To-do:
 - Add location?
