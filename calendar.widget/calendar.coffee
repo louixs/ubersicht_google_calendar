@@ -243,16 +243,17 @@ style: """
     font-family: 'hack'
     src: url('assets/lib/hack.ttf')
   font-family: hack, Andale Mono, Melno, Monaco, Courier, Helvetica Neue, Osaka
-  color: #7eFFFF
+  color: #df740c  //#7eFFFF
   font-weight: 100
-  font-size: 11 px
-  top: 15%
+  font-size: 13 px
+  top: 50%
   left: 2%
   line-height: 1.5
   //margin-left: -40px
   //padding: 120px 20px 20px
   
-  //.title
+  .title
   //  text-align: center
-  //text-shadow: 0 0 1px rgba(#000, 0.5)  
+    color: #ffe64d //#6fc3df 
+    text-shadow: 0 0 1px rgba(#000, 0.5)  
 """
