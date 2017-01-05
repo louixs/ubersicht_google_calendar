@@ -140,7 +140,7 @@ function getCalIds(){
 
 storeCalendarIDsToFile(){
   local calendar_names=$(getCalendarNames)
-  if [ -z "$calendar_names"]; then
+  if [ -z "$calendar_names" ]; then
      echo 3
      exit 1
   else       
