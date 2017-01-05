@@ -1,4 +1,4 @@
-# Google Calendar API Widget (Übersicht Google Widgets Suite)
+# Google Calendar Widget (Übersicht Google Widgets Suite)
 
 Here it comes, a new year and a new widget. Let's make 2017 a good year!
 
