@@ -6,21 +6,21 @@
 # Dependencies. Best to leave them alone.
 _ = require('./assets/lib/underscore.js');
 
+#==== Google API Credentials ====
 # Fill in your Google API cleint id and client secret
 # Save this file and a browser should launch asking you to allow widget to access google calendar
 # Once you allow, you will be presented with your Authorization code. Please fill it in and save the file.
 # Your calendar events should now show. If not try refreshing Übersicht.
 # If you don't have your client id and/or client secret, please follow the steps in the Setup section in README.md.
 
-#== Please fill in required information == 
 CLIENT_ID:""
 CLIENT_SECRET:""
 AUTHORIZATION_CODE:""
 
+#==== Calendar Name
 # Place calendar names seperated with commas.
 # i.e. "Calendar_1, Calendar_2, Calendar_3, Calendar Name 4"
 # Calendar names are case sensitive.
-
 CALENDAR_NAME:""
 #====
 
