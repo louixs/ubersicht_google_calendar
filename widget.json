@@ -1,6 +1,6 @@
 {
-  "name": "Google Calendar for Ubersichts using oauth2",
-  "description": "Displays today's and tomorrow's events for specified Google calendars that the user has access to view based on user's Google calendar timezone. Allows multiple google calendars in user's calendar list. It utilises Google oauth2. This is also the first in the coming series of Übersicht Google Widgets bundle",
+  "name": "Google Calendar oauth2",
+  "description": "Displays today's and tomorrow's events for multiple Google calendars that the user has access to view using Google API and Google oauth2. This is also the first in the series of Übersicht Google Widgets bundle I am working on",
   "author": "Ryuei Sasaki",
   "email": "ryuei.sasaki@gmail.com"
 }
