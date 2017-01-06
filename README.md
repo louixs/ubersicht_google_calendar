@@ -1,8 +1,9 @@
-# Google Calendar Widget (Using Google API and Oauth)
+# Google Calendar widget for Übersicht
+## (Übersicht Google Widgets Bundle)
 
 Here it comes, a new year and a new widget. Let's make 2017 a good year!
 
-This widget shows events for today and tomorrow based on your the time zone set in your Google calendar settings. As opposed to the preceding widgets for google calendars, it utilises Google Calendar API and Google Oauth2. This is the first widget as a part of Übersicht Google Suite comprising of other widgets that uses Google API (coming soon).
+This widget shows events for today and tomorrow based on your the time zone set in your Google calendar settings. As opposed to the preceding widgets for google calendars, it utilises Google Calendar API and Google Oauth2. This is the first widget of Übersicht Google Suite comprising of widgets that uses Google API (coming soon).
 
 ![Google Calendar](screenshot.png "Google Calendar")
 

@@ -1,6 +1,6 @@
 {
-  "name": "Google Calendar Widget (Using Google API and Oauth)",
-  "description": "Displays today's and tomorrow's events for multiple Google calendars that the user has access to view using Google API and Google oauth2. This is also the first in the series of Übersicht Google Widgets bundle I am working on",
+  "name": "Google Calendar widget for Übersicht",
+  "description": "Displays today's and tomorrow's events for multiple Google calendars that the user has access to view using Google API and Google oauth2. This is the first in the Übersicht Google Widgets bundle I am working on",
   "author": "Ryuei Sasaki",
   "email": "ryuei.sasaki@gmail.com"
 }
