@@ -12,7 +12,7 @@ This widget shows events for today and tomorrow based on your the time zone set 
 2. Go to https://console.developers.google.com > click on API Project > select Create project > fill in your project name > click on create
 3. Make sure you are in API Manager. Click on Enable API and select Calendar API to enable.
 4. Select Credentials > select Create credentials > select OAuth client ID > select Other > fill in the name such as ubersicht > copy client ID and client secret > paste them in the calendar.coffee file after CLIENT_ID: and CLIENT_SECRET: They are located on the top. Note that you would need to store them as string i.e. surround them with ```""```. 
-Your calendar.coffee file should look like the following:
+Your calendar.coffee file's Google API Credentials section should look like the following:
 
     ```
     CLIENT_ID: "your_client_id"
@@ -21,7 +21,7 @@ Your calendar.coffee file should look like the following:
     ```
 
 5. Go to OAuth consent screen > fill in/choose your gmail address > fill in Product name shown to users with the same name that you chose in the step 2 above > make sure to save
-6. Saving your script should launch a web browser asking whether you would like to allow your app to view google calendar. Click Allow and the next screen will show a code. Please copy and paste it in the calendar.coffee file besides AUTHORIZATION_CODE:. In case a browser does not launch please click on Refresh All Widgets option found in Ubersichts icon on your mac menu bar. At this point you should have the following in your calendar.coffee file:
+6. Saving your script should launch a web browser asking whether you would like to allow your app to view google calendar. Click Allow and the next screen will show a code. Please copy and paste it in the calendar.coffee file besides AUTHORIZATION_CODE:. In case a browser does not launch please click on Refresh All Widgets option found in Ubersichts icon on your mac menu bar. At this point you should have the following in your calendar.coffee file's Google API Credentials section:
 
     ```
     CLIENT_ID: "your_client_id"
