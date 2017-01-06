@@ -1,4 +1,4 @@
-# Google Calendar Widget (Übersicht Google Widgets Suite)
+# Google Calendar Widget (Using Google API and Oauth)
 
 Here it comes, a new year and a new widget. Let's make 2017 a good year!
 
@@ -28,8 +28,7 @@ Your calendar.coffee file should look like the following:
     AUTHORIZATION_CODE: "your_authorizaion_code"
     ```
     
-7. Please put the name(s) of your calendar(s) that you would like to display - seperated with commnas ```,```
-- after calendar_name: in calendar.coffee file. Note that you would need to store them as string. Please note calendar names are case sensitive. 
+7. Please put the name(s) of your calendar(s) that you would like to display - seperated with commnas ```,``` after calendar_name: in calendar.coffee file. Note that you would need to store them as string. Please note calendar names are case sensitive. 
 8. Save the calendar and your calendar events should now show if all goes well. If they do not show after 30 sec to 1 min. try clicking on Refresh All Widgets option.
 
 ## Notes:
