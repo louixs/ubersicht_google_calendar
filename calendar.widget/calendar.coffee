@@ -6,28 +6,24 @@
 # Dependencies. Best to leave them alone.
 _ = require('./assets/lib/underscore.js');
 
-# TODO
-# - cleaning
-# - testing : change the order of calendar, add 2+ calendars, 0 events days (today, tomorrow and both)
-# - Add location?
-# - add feature to allow calendar names with space - maybe for the next version
-
-# Place calendar names seperated with commas.
-# Please note calendar names are case sensitive.
-# i.e. "Calendar_1, Calendar_2, Calendar_3, Calendar Name 4"
-CALENDAR_NAME:""
-
 # Fill in your Google API cleint id and client secret
 # Save this file and a browser should launch asking you to allow widget to access google calendar
 # Once you allow, you will be presented with your Authorization code. Please fill it in and save the file.
 # Your calendar events should now show. If not try refreshing Übersicht.
 # If you don't have your client id and/or client secret, please follow the steps in the Setup section in README.md.
-#====
+
+#== Please fill in required information == 
 CLIENT_ID:""
 CLIENT_SECRET:""
 AUTHORIZATION_CODE:""
 
-#=====  
+# Place calendar names seperated with commas.
+# i.e. "Calendar_1, Calendar_2, Calendar_3, Calendar Name 4"
+# Calendar names are case sensitive.
+
+CALENDAR_NAME:""
+#====
+
 command:"""
   if [ ! -d assets ]; then
     cd "$PWD/calendar.widget"
