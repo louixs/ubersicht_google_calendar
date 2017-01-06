@@ -10,7 +10,7 @@ This widget shows events for today and tomorrow based on your the time zone set 
 ## Setup:
 1. Perhaps obvious but you would need a google account
 2. Go to https://console.developers.google.com > click on API Project > select Create project > fill in your project name > click on create
-3. Make sure you are in API Manager
+3. Make sure you are in API Manager. Click on Enable API and select Calendar API to enable.
 4. Select Credentials > select Create credentials > select OAuth client ID > select Other > fill in the name such as ubersicht > copy client ID and client secret > paste them in the calendar.coffee file after CLIENT_ID: and CLIENT_SECRET: They are located on the top. Note that you would need to store them as string i.e. surround them with ```""```. 
 Your calendar.coffee file should look like the following:
 
