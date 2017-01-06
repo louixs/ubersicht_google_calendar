@@ -22,10 +22,12 @@ CALENDAR_NAME:""
 # Once you allow, you will be presented with your Authorization code. Please fill it in and save the file.
 # Your calendar events should now show. If not try refreshing Übersicht.
 # If you don't have your client id and/or client secret, please follow the steps in the Setup section in README.md.
+#====
 CLIENT_ID:""
 CLIENT_SECRET:""
 AUTHORIZATION_CODE:""
-  
+
+#=====  
 command:"""
   if [ ! -d assets ]; then
     cd "$PWD/calendar.widget"
