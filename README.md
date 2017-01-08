@@ -54,4 +54,5 @@ https://github.com/ShellShoccar-jpn/Parsrs/blob/master/parsrj.sh
 This widget especially the oauth.sh is still at beta stage. Please use at your own risk. I would also highly appreciate constructive feedback. Many thanks.
 
 ## To-do:
+- fix sorting; sorting of the event is not in the order of time but number at the moment
 - Add locations?
