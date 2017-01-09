@@ -15,10 +15,14 @@ source debugLogger.sh
 
 # Set initial variables these should not be mutated
 PARENT_DIR=${PWD%/*}
-COFFEE_FILE="$PARENT_DIR"/calendar.coffee
-SIGNAL_FILE=signal
-TOKEN_FILE=token
-R_TOKEN_FILE=r_token
+three_DIR_UP=${PWD%/*/*/*}
+#CONFIG_FILE="$PARENT_DIR"/calendar.coffee
+
+CONFIG_FILE="$three_DIR_UP"/google_oauth.config
+
+SIGNAL_FILE=signal.db
+TOKEN_FILE=token.db
+R_TOKEN_FILE=r_token.db
 
 #addresses
 SCOPE=https://www.googleapis.com/auth/calendar.readonly
@@ -33,7 +37,7 @@ function timeNow(){
 # A function that checks if a variable exists or no
 function varExists(){
   # check if the variable exists or not
-  if [ $1 ]; then
+  if [ "$1" ]; then
      echo 1 # var exists
   else
      echo 0 # var does not exist
@@ -89,22 +93,34 @@ function readCoffeeFileAndSetVars(){
   # 1. when wrapped in a function, sed doesn't spit out the error if it cannot fild value
   # 2. AUTH_URL needs to be set right after reading the variables from .coffee file, else it was not picking up correctly
   # most likely due to polluted global scope that mutates variables all the time
-  COFFEE_FILE="$PARENT_DIR"/calendar.coffee
-  CLIENT_ID=$(sed -e 1b "$COFFEE_FILE" | grep CLIENT_ID | sed 's/.*://' | sed 's/"//' | sed '$s/"/ /g' | xargs)
-  CLIENT_SECRET=$(sed -e 1b "$COFFEE_FILE" | grep CLIENT_SECRET | sed 's/.*://' | sed 's/"//' | sed '$s/"/ /g' | xargs)
-  AUTHORIZATION_CODE=$(sed -e 1b "$COFFEE_FILE" | grep AUTHORIZATION_CODE | sed 's/.*://' | sed 's/"//' | sed '$s/"/ /g' | xargs)  
+  CONFIG_FILE="$PARENT_DIR"/calendar.coffee
+  CLIENT_ID=$(sed -e 1b "$CONFIG_FILE" | grep CLIENT_ID | sed 's/.*://' | sed 's/"//' | sed '$s/"/ /g' | xargs)
+  CLIENT_SECRET=$(sed -e 1b "$CONFIG_FILE" | grep CLIENT_SECRET | sed 's/.*://' | sed 's/"//' | sed '$s/"/ /g' | xargs)
+  AUTHORIZATION_CODE=$(sed -e 1b "$CONFIG_FILE" | grep AUTHORIZATION_CODE | sed 's/.*://' | sed 's/"//' | sed '$s/"/ /g' | xargs)  
   AUTH_URL="https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=$CLIENT_ID&redirect_uri=$REDIRECT_URI&scope=$SCOPE&access_type=offline"
 }
 
+function readConfigFileAndSetVars(){
+  # 1. when wrapped in a function, sed doesn't spit out the error if it cannot fild value
+  # 2. AUTH_URL needs to be set right after reading the variables from .coffee file, else it was not picking up correctly
+  # most likely due to polluted global scope that mutates variables all the time
+  CONFIG_FILE="$three_DIR_UP"/google_oauth.config
+  CLIENT_ID=$(sed -e 1b "$CONFIG_FILE" | grep CLIENT_ID | sed 's/.*://' | sed 's/"//' | sed '$s/"/ /g' | xargs)
+  CLIENT_SECRET=$(sed -e 1b "$CONFIG_FILE" | grep CLIENT_SECRET | sed 's/.*://' | sed 's/"//' | sed '$s/"/ /g' | xargs)
+  AUTHORIZATION_CODE=$(sed -e 1b "$CONFIG_FILE" | grep AUTHORIZATION_CODE | sed 's/.*://' | sed 's/"//' | sed '$s/"/ /g' | xargs)  
+  AUTH_URL="https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=$CLIENT_ID&redirect_uri=$REDIRECT_URI&scope=$SCOPE&access_type=offline"
+}
+
+
 function credCheck(){
-  readCoffeeFileAndSetVars
+  readConfigFileAndSetVars
   if [ ! -n "$CLIENT_ID" ] || [ ! -n "$CLIENT_SECRET" ]; then
     echo 1
     exit 1 #exit this script with error  
   elif [ -n "$CLIENT_ID" ] && [ -n "$CLIENT_SECRET" ]; then
-    readCoffeeFileAndSetVars
+    readConfigFileAndSetVars
   elif [ -s "$CLIENT_ID" ] && [ -s "$CLIENT_SECRET" ]; then
-    readCoffeeFileAndSetVars
+    readConfigFileAndSetVars
   else
     echo "Unhandled case; investigate and need to fix"
     echo "Please report this as a bug"
@@ -113,11 +129,11 @@ function credCheck(){
 }
 
 function checkAuthCode(){
-  readCoffeeFileAndSetVars
+  readConfigFileAndSetVars
   
-  if  ([ -s "$COFFEE_FILE" ] && [ $AUTHORIZATION_CODE ]); then
+  if  ([ -s "$CONFIG_FILE" ] && [ $AUTHORIZATION_CODE ]); then
     :
-  elif ([ -s "$COFFEE_FILE" ] && [ -n $AUTHORIZATION_CODE ]); then
+  elif ([ -s "$CONFIG_FILE" ] && [ -n $AUTHORIZATION_CODE ]); then
   # Authorization code should be needed only once first
   # once it is retrived and a valid access token is issued together with a refresh token
   # the refresh token should be used to re-new access token once it expired
@@ -146,7 +162,7 @@ function removeSignalFile(){
 }
 
 function checkRefreshToken(){
-  R_TOKEN_FILE=r_token
+  R_TOKEN_FILE=r_token.db
   REFRESH_TOKEN=$(sed -e 1b $R_TOKEN_FILE | grep refresh_token | sed 's/.*://' | xargs)
   local refresh_token_exists=$(varExists $REFRESH_TOKEN)
   if [ "${refresh_token_exists}" -eq 1 ]; then      
@@ -177,7 +193,7 @@ function getToken(){
 
       if [ "$refresh_token_exists" -eq 1 ] ; then
         # check if the newly retrieved token actually exists to make sure        
-        # write refresh token to the r_token file
+        # write refresh token to the r_token.db file
         echo "refresh_token:$new_refresh_token" > $R_TOKEN_FILE
         ACCESS_TOKEN=$new_access_token
         REFRESH_TOKEN=$(sed -e 1b "$R_TOKEN_FILE" | grep refresh_token | sed 's/.*://' | xargs)
@@ -223,7 +239,7 @@ function tokenExists(){
        
        if [ "${token_exists}" -eq 1 ]; then
          #save refresh_token to file
-         echo "refresh_token:$new_refresh_token" > r_token
+         echo "refresh_token:$new_refresh_token" > r_token.db
          #assign token
          ACCESS_TOKEN=$new_access_token
          REFRESH_TOKEN=$(sed -e 1b $R_TOKEN_FILE | grep refresh_token | sed 's/.*://' | xargs)
@@ -276,9 +292,26 @@ function checkTokenStatus(){
     fi
 }
 
+setupConfigFile(){
+   makeFileIfNone "$CONFIG_FILE"
+   
+   if [ -s "$CONFIG_FILE" ]; then # if file has some data
+     :
+   else
+     # if file is empty
+     echo "CLIENT_ID:" >> "$CONFIG_FILE"
+     echo "CLIENT_SECRET:" >> "$CONFIG_FILE"
+     echo "AUTHORIZATION_CODE:" >> "$CONFIG_FILE"
+   fi
+}
+
+#Make cofig file for client id, cliet secrets and authorization code if it does not exist 
+setupConfigFile
+
 # Read client id and secrets first in case they alreay exists for later usage
 # IMPORTANT
-readCoffeeFileAndSetVars
+# readCoffeeFileAndSetVars
+readConfigFileAndSetVars
 
 # Make necessary files if they don't exist
 makeMultipleFiles "$TOKEN_FILE $R_TOKEN_FILE"

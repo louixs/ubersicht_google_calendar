@@ -44,7 +44,7 @@ function setVars(){
   foundPaths="${whereCat///cat}:${whereAwk///awk}:${whereNetstat///netstat}"
   export PATH="$foundPaths" &&
 
-  TOKEN_FILE=token
+  TOKEN_FILE=token.db
   ACCESS_TOKEN=$(cat "$TOKEN_FILE" | grep access_token | awk '{print $2}' | tr -d \",)
   CAL_LIST_URL="https://www.googleapis.com/calendar/v3/users/me/calendarList/?showHidden=true"
 }
@@ -121,13 +121,40 @@ function getEventsById(){
 
 function calIdByName(){
   local CAL_ID=$(./parsej.sh list.db | grep -B 1 "$1" | head -n1 | awk '{$1="";print $0}')
-  echo "$CAL_ID"
+  echo $CAL_ID
 }
 
-function getCalendarNames(){
+function varExists(){
+  # check if the variable exists or not
+  if [ "$1" ]; then
+     echo 1 # var exists
+  else
+     echo 0 # var does not exist
+  fi
+}
+
+function getCalendarNames(){  
   local PARENT_DIR=${PWD%/*}
-  local coffee_file="$PARENT_DIR"/calendar.coffee
-  local calendar_names=$(sed -e 1b "$coffee_file" | grep CALENDAR_NAME | sed 's/.*://' | xargs)
+  local three_DIR_UP=${PWD%/*/*/*}
+  local COFFEE_FILE="$PARENT_DIR"/calendar.coffee
+  local CONFIG_FILE="$three_DIR_UP"/google_oauth.config
+
+  local coffee_file_calendar_names=$(sed -e 1b "$COFFEE_FILE" | grep CALENDAR_NAME | sed 's/.*://' | xargs)
+
+  local config_file_calendar_names=$(sed -e 1b "$CONFIG_FILE" | grep CALENDAR_NAME | sed 's/.*://' | xargs)
+  
+  config_file_calendar_names_exist=$(varExists "$config_file_calendar_names")
+
+  coffee_file_calendar_names_exist=$(varExists "$coffee_file_calendar_names")
+                                      
+  if [ "${config_file_calendar_names_exist}" -eq 1 ]; then
+    calendar_names="$config_file_calendar_names"
+  elif [ "${coffee_file_calendar_names_exist}" -eq 1 ]; then
+    calendar_names="$coffee_file_calendar_names"
+  else
+    :
+  fi
+       
   echo "$calendar_names"
 }
 

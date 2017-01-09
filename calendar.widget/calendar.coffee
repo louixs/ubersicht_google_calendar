@@ -219,7 +219,7 @@ update: (output, domEl)->
 
   showCalendarItemsIfErrorFree=->
      if parseInt(output) is 1
-       errMsg="Please fill in your Client ID and Client secret the .coffee file, located on top of the file, in the .widget directory. Once you save and have a valid set of cliet ID/secret, a browser should launch and ask whether you want to allow your app to access google calendar. Please allow and you will be presented with Authorization code. If you don't have Client ID/secret, you would need to generate them on your google developer console. http://console.developers.google.com"
+       errMsg="Please fill in google_oauth.config file (found 2 directories up. If you install .widget folder in the standard übersicht location, it will be in Library/Application Support/Übersicht/widgets) with Client ID and Client secret. Please save and click on Refresh All Widgets from the Übersicht menu. Once you save and have a valid set of client ID/secret, a browser should launch and ask whether you want to allow your app to access google calendar. Please allow and you will be presented with Authorization code. If you don't have Client ID/secret, you would need to generate them on your google developer console. http://console.developers.google.com"
        addErrMsgToDom(errMsg)
      else if parseInt(output) is 2
        errMsg="A browser window launches asking if you would like to allow your app. Click Allow and your authorization code will be shown. Please copy the code and paste it in .coffee file. Once it is done please save this file to let Übersicht reload or/and use Refresh All Widgets again to reload."
