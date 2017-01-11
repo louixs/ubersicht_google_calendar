@@ -18,7 +18,7 @@ function runDebugLogger(){
 }
 
 # Uncomment the below to enalbe the debugger
-# runDebugLogger
+runDebugLogger
 
 # If any error occurs, exit a script with exit 1
 function exitIfFail(){
@@ -67,6 +67,25 @@ function  getCalendarIDToShow(){
   echo "$calendarIDToShow"
 }
 
+function makeCalUrl(){    
+    # Expects 3 arguments
+    # $1 calendar ID which should be supplied when calling the parten function 
+    # $2 date in ISO8601 format
+    # $3 date in ISO8601 format
+    local orderBy="startTime"
+    echo "https://www.googleapis.com/calendar/v3/calendars/$1/events/?timeMin=$2&timeMax=$3&singleEvents=true&orderBy=$orderBy"
+}
+
+function getEventTime(){
+    local eventTime=$(./parsej.sh $1 | grep $2 | sed "s/.*$2[[:space:]].*/$ All Day/" | awk '{$1="";print $0"+|+"}' | sed '$s/+|+/ /g' | xargs)
+    echo "$eventTime"
+}
+    
+function getEventName(){
+  local eventName=$(./parsej.sh $1 | grep '].summary' | sed "s/.*start.date[[:space:]].*/$ All Day/" | awk '{$1="";print $0"+|+"}' | sed '$s/+|+//g' | xargs -0 | sed '/^$/d')
+  echo "$eventName"
+}
+ 
 function getEventsById(){
   # Accepts 1 argument
   # $1 = calendar ID
@@ -75,33 +94,15 @@ function getEventsById(){
   
   tmrwStart=$(date -v +1d -u +"%Y-%m-%dT00:00:00Z")
   tmrwEnd=$(date -v +1d -u +"%Y-%m-%dT23:59:59Z")
-
-  function makeCalUrl(){    
-    # Expects 3 arguments
-    # $1 calendar ID which should be supplied when calling the parten function 
-    # $2 date in ISO8601 format
-    # $3 date in ISO8601 format
-    local orderBy="startTime"
-    echo "https://www.googleapis.com/calendar/v3/calendars/$1/events/?timeMin=$2&timeMax=$3&singleEvents=true&orderBy=$orderBy"
-  }
   
   local todayUrl=$( makeCalUrl $1 $todayStart $todayEnd )
   local tmrwUrl=$( makeCalUrl $1 $tmrwStart $tmrwEnd )
   local today=$( getCal $todayUrl )
   local tmrw=$( getCal $tmrwUrl )
+  
   echo $today > today.db
   echo $tmrw  > tmrw.db
 
-  function getEventTime(){
-    local eventTime=$(./parsej.sh $1 | grep $2 | sed "s/.*$2[[:space:]].*/$ All Day/" | awk '{$1="";print $0"+|+"}' | sed '$s/+|+/ /g' | xargs)
-    echo "$eventTime"
-  }
-    
-  function getEventName(){
-    local eventName=$(./parsej.sh $1 | grep '].summary' | sed "s/.*start.date[[:space:]].*/$ All Day/" | awk '{$1="";print $0"+|+"}' | sed '$s/+|+//g' | xargs)
-    echo "$eventName"
-  }
-  
   todayStartTime=$(getEventTime today.db "start.date" )
   todayEndTime=$(getEventTime today.db "end.date" )
   todayTime="$todayStartTime~$todayEndTime"
@@ -148,9 +149,9 @@ function getCalendarNames(){
   coffee_file_calendar_names_exist=$(varExists "$coffee_file_calendar_names")
                                       
   if [ "${config_file_calendar_names_exist}" -eq 1 ]; then
-    calendar_names="$config_file_calendar_names"
+    local calendar_names="$config_file_calendar_names"
   elif [ "${coffee_file_calendar_names_exist}" -eq 1 ]; then
-    calendar_names="$coffee_file_calendar_names"
+    local calendar_names="$coffee_file_calendar_names"
   else
     :
   fi
@@ -167,15 +168,18 @@ function getCalIds(){
 
 storeCalendarIDsToFile(){
   local calendar_names=$(getCalendarNames)
+
   if [ -z "$calendar_names" ]; then
      echo 3
      exit 1
-  else       
+  else
+    
     IFS=',' read -ra names <<< "$calendar_names"
     for i in "${names[@]}"; do
       trimmed=$(echo "$i" | xargs)
       calIdByName "$trimmed"
     done > calIDs.db
+    
   fi
 }
 

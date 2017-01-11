@@ -21,7 +21,7 @@ AUTHORIZATION_CODE:""
 # Place calendar names seperated with commas.
 # i.e. "Calendar_1, Calendar_2, Calendar_3, Calendar Name 4"
 # Calendar names are case sensitive.
-CALENDAR_NAME:""
+CALENDAR_NAME:"Lena_Ryuei"
 #====
 
 command:"""
