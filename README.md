@@ -3,17 +3,16 @@
 
 Here it comes, a new year and a new widget. Let's make 2017 a good year!
 
-This widget shows events for today and tomorrow based on your the time zone set in your Google calendar settings. As opposed to the preceding widgets for google calendars, it utilises Google Calendar API and Google Oauth2. This is the first widget of Übersicht Google Suite comprising of widgets that uses Google API (coming soon).
+This widget shows events for today and tomorrow based on the time zone set in your Google calendar settings. As opposed to the other widgets for google calendars, this uses Google Calendar API and Google Oauth2. This widget is a part of the Übersicht Google Suite comprising of widgets that uses Google API (other widgets are on their way).
 
 ![Google Calendar](screenshot.png "Google Calendar")
 
 ## Setup:
 1. Perhaps obvious but you would need a google account
 2. Go to https://console.developers.google.com > click on API Project > select Create project > fill in your project name > click on create
-3. Make sure you are in API Manager. Click on Enable API and select Calendar API to enable.
+3. Make sure you are in API Manager and click on Enable API and select Calendar API to enable
 4. Go to OAuth consent screen > fill in/choose your gmail address > fill in Product name shown to users with the same name that you chose in the step 2 above > make sure to save
-
-5. Select Credentials > select Create credentials > select OAuth client ID > select Other > fill in the name such as ubersicht > copy client ID and client secret > paste them in the calendar.coffee file after CLIENT_ID: and CLIENT_SECRET: under the Google API Credentials section. Note that you would need to store them as string i.e. surround them with ```""```. 
+5. Select Credentials > select Create credentials > select OAuth client ID > select Other > fill in the name such as ubersicht > copy client ID and client secret > paste them in the calendar.coffee file after CLIENT_ID: and CLIENT_SECRET: under the Google API Credentials section. Note that you would need to store them as string i.e. surround them with ```""```.
 Your calendar.coffee file's Google API Credentials section should look like the following:
 
     ```
@@ -30,7 +29,12 @@ Your calendar.coffee file's Google API Credentials section should look like the 
     AUTHORIZATION_CODE: "your_authorizaion_code"
     ```
     
-7. Please put the name(s) of your calendar(s) that you would like to display - seperated with commnas ```,``` after calendar_name: in calendar.coffee file. Note that you would need to store them as string. Please note calendar names are case sensitive. 
+7. Please put the name(s) of your calendar(s) that you would like to display - seperated with commnas ```,``` after calendar_name: in calendar.coffee file. Note that you would need to store them as string. Please note calendar names are case sensitive.
+
+   ```
+   CALENDAR_NAME:"calendar 1, calendar_2, calendar 3"
+   ```
+   
 8. Save the calendar and your calendar events should now show if all goes well. If they do not show after 30 sec to 1 min. try clicking on Refresh All Widgets option.
 
 ## Notes:
