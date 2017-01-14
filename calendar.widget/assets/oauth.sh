@@ -14,19 +14,20 @@ source debugLogger.sh
 #activate_debug_logger
 
 # Set initial variables these should not be mutated
-PARENT_DIR=${PWD%/*}
-three_DIR_UP=${PWD%/*/*/*}
-#CONFIG_FILE="$PARENT_DIR"/calendar.coffee
+declare -rx PARENT_DIR=${PWD%/*}
+declare -rx COFFEE_FILE="$PARENT_DIR"/calendar.coffee
 
-CONFIG_FILE="$three_DIR_UP"/google_oauth.config
+declare -rx three_DIR_UP=${PWD%/*/*/*}
+declare -rx DEV_CONFIG_FILE="$three_DIR_UP"/google_oauth.config
+#CONFIG_FILE="$three_DIR_UP"/google_oauth.config
 
-SIGNAL_FILE=signal.db
-TOKEN_FILE=token.db
-R_TOKEN_FILE=r_token.db
+declare -rx SIGNAL_FILE=signal.db
+declare -rx TOKEN_FILE=token.db
+declare -rx R_TOKEN_FILE=r_token.db
 
 #addresses
 SCOPE=https://www.googleapis.com/auth/calendar.readonly
-REDIRECT_URI=urn:ietf:wg:oauth:2.0:oob
+declare -rx REDIRECT_URI=urn:ietf:wg:oauth:2.0:oob
 #================
 
 function timeNow(){
@@ -89,38 +90,78 @@ function isSignalGet(){
   fi
 }
 
-function readCoffeeFileAndSetVars(){
+function readCredVar(){
+  #$1 = file name 
+  #$2 = var name e.g. CLIENT_ID
+  local credVar=$(sed -e 1b "$1" | grep "$2" | sed 's/.*://' | sed 's/"//' | sed '$s/"/ /g' | xargs)
+  echo "$credVar"
+}
+
+function setCredVars(){
   # 1. when wrapped in a function, sed doesn't spit out the error if it cannot fild value
   # 2. AUTH_URL needs to be set right after reading the variables from .coffee file, else it was not picking up correctly
   # most likely due to polluted global scope that mutates variables all the time
-  CONFIG_FILE="$PARENT_DIR"/calendar.coffee
-  CLIENT_ID=$(sed -e 1b "$CONFIG_FILE" | grep CLIENT_ID | sed 's/.*://' | sed 's/"//' | sed '$s/"/ /g' | xargs)
-  CLIENT_SECRET=$(sed -e 1b "$CONFIG_FILE" | grep CLIENT_SECRET | sed 's/.*://' | sed 's/"//' | sed '$s/"/ /g' | xargs)
-  AUTHORIZATION_CODE=$(sed -e 1b "$CONFIG_FILE" | grep AUTHORIZATION_CODE | sed 's/.*://' | sed 's/"//' | sed '$s/"/ /g' | xargs)  
+
+  # $1 = config_file location
+  local FILE=$1
+  
+  CLIENT_ID=$(readCredVar "$FILE" CLIENT_ID)
+  CLIENT_SECRET=$(readCredVar "$FILE" CLIENT_SECRET)
+  AUTHORIZATION_CODE=$(readCredVar "$FILE" AUTHORIZATION_CODE)
   AUTH_URL="https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=$CLIENT_ID&redirect_uri=$REDIRECT_URI&scope=$SCOPE&access_type=offline"
 }
 
-function readConfigFileAndSetVars(){
-  # 1. when wrapped in a function, sed doesn't spit out the error if it cannot fild value
-  # 2. AUTH_URL needs to be set right after reading the variables from .coffee file, else it was not picking up correctly
-  # most likely due to polluted global scope that mutates variables all the time
-  CONFIG_FILE="$three_DIR_UP"/google_oauth.config
-  CLIENT_ID=$(sed -e 1b "$CONFIG_FILE" | grep CLIENT_ID | sed 's/.*://' | sed 's/"//' | sed '$s/"/ /g' | xargs)
-  CLIENT_SECRET=$(sed -e 1b "$CONFIG_FILE" | grep CLIENT_SECRET | sed 's/.*://' | sed 's/"//' | sed '$s/"/ /g' | xargs)
-  AUTHORIZATION_CODE=$(sed -e 1b "$CONFIG_FILE" | grep AUTHORIZATION_CODE | sed 's/.*://' | sed 's/"//' | sed '$s/"/ /g' | xargs)  
-  AUTH_URL="https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=$CLIENT_ID&redirect_uri=$REDIRECT_URI&scope=$SCOPE&access_type=offline"
+setupDevConfigFile(){
+   makeFileIfNone "$DEV_CONFIG_FILE"
+   
+   if [ -s "$DEV_CONFIG_FILE" ]; then # if file has some data
+     :
+   else
+     # if file is empty
+     echo "CLIENT_ID:" >> "$DEV_CONFIG_FILE"
+     echo "CLIENT_SECRET:" >> "$DEV_CONFIG_FILE"
+     echo "AUTHORIZATION_CODE:" >> "$DEV_CONFIG_FILE"
+   fi
 }
 
+#Make cofig file for client id, cliet secrets and authorization code if it does not exist 
+
+function assignCredentialVars(){
+  # check calendar.coffee for credentails
+  local coffee_cred_var_exists=$(
+        local coffee_client_id=$(readCredVar "$COFFEE_FILE" CLIENT_ID )
+        local coffee_client_secret=$(readCredVar "$COFFEE_FILE" CLIENT_SECRET )
+        if [ ! -z "$coffee_client_id" ] && [ ! -z "coffee_client_secret" ] ; then
+        # if both exist
+          echo 1 # yes exist
+        else
+          echo 0 # nope
+        fi
+        )
+
+  # assign credential variables if they exist in calendar.coffee
+  # and stop making google_oauth.config file
+  if [ "${coffee_cred_var_exists}" -eq 1 ]; then
+    setCredVars "$COFFEE_FILE"
+    CONFIG_FILE="$COFFEE_FILE" # set CONFIG_FILE globaly here
+  else
+  # for dev, credentials should not be filled in calendar
+  # make google_ouath.config outside of the calendar folder and set credentials from there
+    setupDevConfigFile
+    setCredVars "$DEV_CONFIG_FILE"
+    CONFIG_FILE="$DEV_CONFIG_FILE"
+  fi
+}
 
 function credCheck(){
-  readConfigFileAndSetVars
+  assignCredentialVars
   if [ ! -n "$CLIENT_ID" ] || [ ! -n "$CLIENT_SECRET" ]; then
     echo 1
     exit 1 #exit this script with error  
   elif [ -n "$CLIENT_ID" ] && [ -n "$CLIENT_SECRET" ]; then
-    readConfigFileAndSetVars
+    assignCredentialVars
   elif [ -s "$CLIENT_ID" ] && [ -s "$CLIENT_SECRET" ]; then
-    readConfigFileAndSetVars
+    assignCredentialVars
   else
     echo "Unhandled case; investigate and need to fix"
     echo "Please report this as a bug"
@@ -129,7 +170,7 @@ function credCheck(){
 }
 
 function checkAuthCode(){
-  readConfigFileAndSetVars
+  assignCredentialVars
   
   if  ([ -s "$CONFIG_FILE" ] && [ $AUTHORIZATION_CODE ]); then
     :
@@ -162,7 +203,6 @@ function removeSignalFile(){
 }
 
 function checkRefreshToken(){
-  R_TOKEN_FILE=r_token.db
   REFRESH_TOKEN=$(sed -e 1b $R_TOKEN_FILE | grep refresh_token | sed 's/.*://' | xargs)
   local refresh_token_exists=$(varExists $REFRESH_TOKEN)
   if [ "${refresh_token_exists}" -eq 1 ]; then      
@@ -292,26 +332,9 @@ function checkTokenStatus(){
     fi
 }
 
-setupConfigFile(){
-   makeFileIfNone "$CONFIG_FILE"
-   
-   if [ -s "$CONFIG_FILE" ]; then # if file has some data
-     :
-   else
-     # if file is empty
-     echo "CLIENT_ID:" >> "$CONFIG_FILE"
-     echo "CLIENT_SECRET:" >> "$CONFIG_FILE"
-     echo "AUTHORIZATION_CODE:" >> "$CONFIG_FILE"
-   fi
-}
-
-#Make cofig file for client id, cliet secrets and authorization code if it does not exist 
-setupConfigFile
-
 # Read client id and secrets first in case they alreay exists for later usage
 # IMPORTANT
-# readCoffeeFileAndSetVars
-readConfigFileAndSetVars
+assignCredentialVars
 
 # Make necessary files if they don't exist
 makeMultipleFiles "$TOKEN_FILE $R_TOKEN_FILE"
