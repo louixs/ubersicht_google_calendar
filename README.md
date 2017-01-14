@@ -11,16 +11,18 @@ This widget shows events for today and tomorrow based on your the time zone set 
 1. Perhaps obvious but you would need a google account
 2. Go to https://console.developers.google.com > click on API Project > select Create project > fill in your project name > click on create
 3. Make sure you are in API Manager. Click on Enable API and select Calendar API to enable.
-4. Select Credentials > select Create credentials > select OAuth client ID > select Other > fill in the name such as ubersicht
-5. Copy client ID and client secret > paste them in the google_oauth.config file after CLIENT_ID: and CLIENT_SECRET: They are located 3 directoris up. If you installed calendar.widget folder in the standard übersicht location, it will be in Library/Application Support/Übersicht/. Your google_oauth.config should look like the following now:
+4. Go to OAuth consent screen > fill in/choose your gmail address > fill in Product name shown to users with the same name that you chose in the step 2 above > make sure to save
+
+5. Select Credentials > select Create credentials > select OAuth client ID > select Other > fill in the name such as ubersicht > copy client ID and client secret > paste them in the calendar.coffee file after CLIENT_ID: and CLIENT_SECRET: under the Google API Credentials section. Note that you would need to store them as string i.e. surround them with ```""```. 
+Your calendar.coffee file's Google API Credentials section should look like the following:
+
     ```
     CLIENT_ID: "your_client_id"
     CLIENT_SECRET: "your_client_secret"
     AUTHORIZATION_CODE:
     ```
-
-5. Go to OAuth consent screen > fill in/choose your gmail address > fill in Product name shown to users with the same name that you chose in the step 2 above > make sure to save
-6. Saving your script should launch a web browser asking whether you would like to allow your app to view google calendar. Click Allow and the next screen will show a code. Please copy and paste it in the google_oauth.config file besides AUTHORIZATION_CODE:. In case a browser does not launch please click on Refresh All Widgets option found in Ubersichts icon on your mac menu bar. At this point you should have the following in your google_oauth.config file's Google API Credentials section:
+    
+6. Saving your script should launch a web browser asking whether you would like to allow your app to view gmail. Click Allow and the next screen will show a code. Please copy and paste it in the cred file besides AUTHORIZATION_CODE:. In case a browser does not launch please click on Refresh All Widgets option found in Ubersichts icon on your mac menu bar. At this point your calendar.coffee file's Google API Credentials section should have the following:
 
     ```
     CLIENT_ID: "your_client_id"
@@ -43,7 +45,7 @@ Generally if the calendar does not display even though you have filled correct c
 
 ## Lastly...
 The sample events on the screenshot are not supposed to make sense. They were written for testing purposes.
-Translation was done using the tool : http://translatr.varunmalhotra.xyz/
+Translation was done using the tool :http://translatr.varunmalhotra.xyz/
 
 ## Credits:
 parsej.sh is made by the devs at ShellShoccar-jpn. Huge thanks to ShellShoccar-jpn.
@@ -57,4 +59,5 @@ This widget especially the oauth.sh is still at beta stage. Please use at your o
 - Add locations?
 
 ## Changelog
- - changed the location of google oauth credentials due to the security and ease of development and deployment
+- abolished google oauth credentials file for users and moved the credential location back to .coffee file for the ease for users
+- changed the location of google oauth credentials due to the security and ease of development and deployment
