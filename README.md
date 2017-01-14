@@ -18,7 +18,7 @@ Your calendar.coffee file's Google API Credentials section should look like the 
     ```
     CLIENT_ID: "your_client_id"
     CLIENT_SECRET: "your_client_secret"
-    AUTHORIZATION_CODE:
+    AUTHORIZATION_CODE:""
     ```
     
 6. Saving your script should launch a web browser asking whether you would like to allow your app to view gmail. Click Allow and the next screen will show a code. Please copy and paste it in the cred file besides AUTHORIZATION_CODE:. In case a browser does not launch please click on Refresh All Widgets option found in Ubersichts icon on your mac menu bar. At this point your calendar.coffee file's Google API Credentials section should have the following:
