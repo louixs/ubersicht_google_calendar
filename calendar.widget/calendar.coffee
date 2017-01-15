@@ -1,4 +1,4 @@
-# Name: Google Calendar for Ubersichts using oauth2
+# Name: Google Calendar for Übersicht using oauth2
 # Description: Obtain google calendar events using google oauth2 for widget for Mac OSX app Übersicht. Sorts and displays events for today and tomorrow based on user's Google calendar's timezone. Allows multiple google calendars in user's calendar list.
 # Author: Ryuei Sasaki
 # Github: https://github.com/louixs/

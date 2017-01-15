@@ -1,0 +1,26 @@
+Notes for myself...
+
+For github setup:
+
+steps:
+remove .DS_Store
+find . -name .DS_Store -print0 | xargs -0 git rm -f --ignore-unmatch
+
+add .DS_Store to .gitignore file
+
+- steps after creating git repo
+- finish and commit any remaining changes first else it will be overridden by merge
+git add .
+git commit -m "commit"
+
+git remote add origin "url"
+git fetch
+git merge origin/master --allow-unrelated-histories
+git add .
+git commit -m "commit"
+git push origin master
+
+For deployment:
+
+First, run ./deployReady.sh calendar.widget to clean up and re-zip .widget folder
+Secondly, to push to github run ./gitPushOriginMaster.sh calendar.widget "git commit message" to make sure to clean up first (just in case) and add all to stage and commit, push to master

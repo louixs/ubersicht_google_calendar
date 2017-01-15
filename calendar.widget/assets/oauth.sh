@@ -14,19 +14,20 @@ source debugLogger.sh
 #activate_debug_logger
 
 # Set initial variables these should not be mutated
+declare -rx GOOGLE_APP=calendar
+
 declare -rx PARENT_DIR=${PWD%/*}
-declare -rx COFFEE_FILE="$PARENT_DIR"/calendar.coffee
+declare -rx COFFEE_FILE="$PARENT_DIR"/"$GOOGLE_APP".coffee
 
 declare -rx three_DIR_UP=${PWD%/*/*/*}
 declare -rx DEV_CONFIG_FILE="$three_DIR_UP"/google_oauth.config
-#CONFIG_FILE="$three_DIR_UP"/google_oauth.config
 
 declare -rx SIGNAL_FILE=signal.db
 declare -rx TOKEN_FILE=token.db
 declare -rx R_TOKEN_FILE=r_token.db
 
 #addresses
-SCOPE=https://www.googleapis.com/auth/calendar.readonly
+SCOPE=https://www.googleapis.com/auth/"$GOOGLE_APP".readonly
 declare -rx REDIRECT_URI=urn:ietf:wg:oauth:2.0:oob
 #================
 
@@ -63,6 +64,7 @@ function makeMultipleFiles(){
   # accepts multiple files
   # pass them as a space separated string as below
   # "$SIGNAL_FILE $LOG_FILE"
+  local file
   for file in $1
   do
     makeFileIfNone $file
@@ -127,7 +129,7 @@ setupDevConfigFile(){
 #Make cofig file for client id, cliet secrets and authorization code if it does not exist 
 
 function assignCredentialVars(){
-  # check calendar.coffee for credentails
+  # check .coffee for credentails
   local coffee_cred_var_exists=$(
         local coffee_client_id=$(readCredVar "$COFFEE_FILE" CLIENT_ID )
         local coffee_client_secret=$(readCredVar "$COFFEE_FILE" CLIENT_SECRET )
@@ -139,14 +141,14 @@ function assignCredentialVars(){
         fi
         )
 
-  # assign credential variables if they exist in calendar.coffee
+  # assign credential variables if they exist in .coffee
   # and stop making google_oauth.config file
   if [ "${coffee_cred_var_exists}" -eq 1 ]; then
     setCredVars "$COFFEE_FILE"
     CONFIG_FILE="$COFFEE_FILE" # set CONFIG_FILE globaly here
   else
-  # for dev, credentials should not be filled in calendar
-  # make google_ouath.config outside of the calendar folder and set credentials from there
+  # for dev, credentials should not be filled in the .coffee file
+  # make google_ouath.config outside of the app folder and set credentials from there
     setupDevConfigFile
     setCredVars "$DEV_CONFIG_FILE"
     CONFIG_FILE="$DEV_CONFIG_FILE"
@@ -206,11 +208,12 @@ function checkRefreshToken(){
   REFRESH_TOKEN=$(sed -e 1b $R_TOKEN_FILE | grep refresh_token | sed 's/.*://' | xargs)
   local refresh_token_exists=$(varExists $REFRESH_TOKEN)
   if [ "${refresh_token_exists}" -eq 1 ]; then      
-    curl -sd "refresh_token=$REFRESH_TOKEN&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&grant_type=refresh_token" https://www.googleapis.com/oauth2/v4/token > $TOKEN_FILE
-    #re-assign access_token to the updated one
-    ACCESS_TOKEN=$(cat "$TOKEN_FILE" | grep access_token | awk '{print $2}' | tr -d \",)
-    removeSignalFile
-    exit 0
+    # curl -sd "refresh_token=$REFRESH_TOKEN&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&grant_type=refresh_token" https://www.googleapis.com/oauth2/v4/token > $TOKEN_FILE
+    # #re-assign access_token to the updated one
+    # ACCESS_TOKEN=$(cat "$TOKEN_FILE" | grep access_token | awk '{print $2}' | tr -d \",)
+    # removeSignalFile
+    # exit 0
+    :
    else
      tokenExists
    fi
