@@ -6,6 +6,8 @@
 # Dependencies. Best to leave them alone.
 _ = require('./assets/lib/underscore.js');
 
+GOOGLE_APP:"calendar"
+
 #==== Google API Credentials ====
 # Fill in your Google API cleint id and client secret
 # Save this file and a browser should launch asking you to allow widget to access google calendar
@@ -26,10 +28,10 @@ CALENDAR_NAME:""
 
 command:"""
   if [ ! -d assets ]; then
-    cd "$PWD/calendar.widget"
-    "$PWD/assets/calendar.sh"
+    cd "$PWD"/calendar.widget
+    "$PWD"/assets/run.sh
   else
-    assets/calendar.sh
+    "$PWD"/run.sh
   fi
 """
 
@@ -244,7 +246,7 @@ style: """
   color: #df740c  //#7eFFFF
   font-weight: 100
   font-size: 11 px
-  top: 40%
+  top: 15%
   left: 2%
   line-height: 1.5
   //margin-left: -40px

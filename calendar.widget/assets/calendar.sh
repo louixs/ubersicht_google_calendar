@@ -28,7 +28,7 @@ function exitIfFail(){
 
 function runOauth (){
   if [ ! -e oauth.sh ]; then
-    cd assets/
+    cd assets
     exitIfFail ./oauth.sh
   else
     exitIfFail ./oauth.sh
@@ -36,6 +36,25 @@ function runOauth (){
 }
 
 runOauth
+
+function readCredVar(){ #rename as this is confusing this applies to extracting all values in a file after a colon :
+  #$1 = file name 
+  #$2 = var name e.g. CLIENT_ID
+  local credVar=$(sed -e 1b "$1" | grep "$2" | sed 's/.*://' | sed 's/"//' | sed '$s/"/ /g' | xargs)
+  echo "$credVar"
+}
+
+readonly PARENT_DIR=${PWD%/*}
+readonly three_DIR_UP=${PWD%/*/*/*}
+readonly COFFEE_FILE_NAME=$(ls ../ | grep .coffee)
+readonly COFFEE_FILE="$PARENT_DIR"/"$COFFEE_FILE_NAME"
+readonly GOOGLE_APP=$( readCredVar "$COFFEE_FILE" GOOGLE_APP )
+readonly CONFIG_FILE="$three_DIR_UP"/google_oauth_"$GOOGLE_APP".config
+
+echo "$COFFEE_FILE_NAME" > testtest
+echo "$COFFEE_FILE" >> testtest
+echo "$GOOGLE_APP" >> testtest
+echo "$CONFIG_FILE" >> testtest
 
 function setVars(){
   whereAwk=$(which awk)
@@ -60,12 +79,6 @@ function getCalList(){
   echo $list > list.db
 }
 getCalList
-
-function  getCalendarIDToShow(){
-  local calendar_name=$(getCalendarNames)
-  local calendarIDToShow=$(calIdByName "$calendar_name" )
-  echo "$calendarIDToShow"
-}
 
 function makeCalUrl(){    
     # Expects 3 arguments
@@ -135,13 +148,7 @@ function varExists(){
 }
 
 function getCalendarNames(){  
-  local PARENT_DIR=${PWD%/*}
-  local three_DIR_UP=${PWD%/*/*/*}
-  local COFFEE_FILE="$PARENT_DIR"/calendar.coffee
-  local CONFIG_FILE="$three_DIR_UP"/google_oauth.config
-
   local coffee_file_calendar_names=$(sed -e 1b "$COFFEE_FILE" | grep CALENDAR_NAME | sed 's/.*://' | xargs)
-
   local config_file_calendar_names=$(sed -e 1b "$CONFIG_FILE" | grep CALENDAR_NAME | sed 's/.*://' | xargs)
   
   config_file_calendar_names_exist=$(varExists "$config_file_calendar_names")
@@ -157,6 +164,12 @@ function getCalendarNames(){
   fi
        
   echo "$calendar_names"
+}
+
+function  getCalendarIDToShow(){
+  local calendar_name=$(getCalendarNames)
+  local calendarIDToShow=$(calIdByName "$calendar_name" )
+  echo "$calendarIDToShow"
 }
 
 function getCalIds(){

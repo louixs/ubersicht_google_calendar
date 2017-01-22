@@ -51,8 +51,7 @@ function activate_debug_logger(){
   
   DEBUG_FILE_NAME=${0##*/}
   #$(echo "$0" | sed 's/.\///')
-  #echo "$DEBUG_FILE_NAME" >> log/fileName
-  LOG_FILE_NAME="$time"_"$DEBUG_FILE_NAME"_"$$".log #e.g. oauth
+  LOG_FILE_NAME="$DEBUG_FILE_NAME"_"$$"_"$time".log #e.g. oauth
   exec 2> "$LOG_DIR_NAME"/"$LOG_FILE_NAME"
   set -vx
 }
