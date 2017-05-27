@@ -1,5 +1,14 @@
 #!/bin/bash
 
+function fileExists(){
+  # check if the variable exists or not
+  if [ -f $1 ] && [ -n $1 ] ; then
+     return 0 # file exists
+  else
+     return 1 # file does not exist
+  fi
+}
+
 folder=$1
 
 if fileExists "$folder".zip; then

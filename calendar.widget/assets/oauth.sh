@@ -6,15 +6,6 @@
 # =====================================================
 # ====     Google Oauth2 
 # =============================
-function setWorkingDir(){
-  if [ ! -e run.sh ]; then
-    cd assets
-  else
-    :
-  fi
-}
-
-setWorkingDir
 
 # -- For debugging 
 source debugLogger.sh
@@ -29,7 +20,6 @@ function readCredVar(){ #rename as this is confusing this applies to extracting 
   echo "$credVar"
 }
 
-
 # Set initial variables these should not be mutated
 declare -rx PARENT_DIR=${PWD%/*}
 readonly COFFEE_FILE_NAME=$(ls ../ | grep .coffee)
@@ -37,6 +27,7 @@ declare -rx COFFEE_FILE="$PARENT_DIR"/"$COFFEE_FILE_NAME"
 declare -rx three_DIR_UP=${PWD%/*/*/*}
 declare -rx GOOGLE_APP=$( readCredVar "$COFFEE_FILE" GOOGLE_APP )
 declare -rx DEV_CONFIG_FILE="$three_DIR_UP"/google_oauth_"$GOOGLE_APP".config
+
 
 declare -rx SIGNAL_FILE=signal.db
 declare -rx TOKEN_FILE=token.db
@@ -73,7 +64,7 @@ function fileExists(){
 
 #Function that creates a file if the said file does not exist in the same directory
 function makeFileIfNone(){
-  if fileExists "$1"; then :; else > "$1"; fi
+  if fileExists "$1"; then :; else touch "$1"; fi
 }
 
 function makeMultipleFiles(){
@@ -192,11 +183,11 @@ function credCheck(){
 }
 
 function checkAuthCode(){
-  assignCredentialVars  
+  assignCredentialVars
+  
   if  ([ -s "$CONFIG_FILE" ] && [ "$AUTHORIZATION_CODE" ]); then
     :
   elif ([ -s "$CONFIG_FILE" ] && [ -n "$AUTHORIZATION_CODE" ]); then
-
   # Authorization code should be needed only once first
   # once it is retrived and a valid access token is issued together with a refresh token
   # the refresh token should be used to re-new access token once it expired
