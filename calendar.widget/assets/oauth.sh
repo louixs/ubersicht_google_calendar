@@ -6,9 +6,6 @@
 # =====================================================
 # ====     Google Oauth2 
 # =============================
-
-<<<<<<< HEAD
-
 function setWorkingDir(){
   if [ ! -e run.sh ]; then
     cd assets
@@ -19,8 +16,6 @@ function setWorkingDir(){
 
 setWorkingDir
 
-=======
->>>>>>> 694577d5c068ef51a9dadf06b61079f39d1f2359
 # -- For debugging 
 source debugLogger.sh
 # Debug function to trace all scripts run below it
@@ -34,11 +29,7 @@ function readCredVar(){ #rename as this is confusing this applies to extracting 
   echo "$credVar"
 }
 
-<<<<<<< HEAD
 
-
-=======
->>>>>>> 694577d5c068ef51a9dadf06b61079f39d1f2359
 # Set initial variables these should not be mutated
 declare -rx PARENT_DIR=${PWD%/*}
 readonly COFFEE_FILE_NAME=$(ls ../ | grep .coffee)
@@ -47,10 +38,6 @@ declare -rx three_DIR_UP=${PWD%/*/*/*}
 declare -rx GOOGLE_APP=$( readCredVar "$COFFEE_FILE" GOOGLE_APP )
 declare -rx DEV_CONFIG_FILE="$three_DIR_UP"/google_oauth_"$GOOGLE_APP".config
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 694577d5c068ef51a9dadf06b61079f39d1f2359
 declare -rx SIGNAL_FILE=signal.db
 declare -rx TOKEN_FILE=token.db
 declare -rx R_TOKEN_FILE=r_token.db
@@ -86,11 +73,7 @@ function fileExists(){
 
 #Function that creates a file if the said file does not exist in the same directory
 function makeFileIfNone(){
-<<<<<<< HEAD
   if fileExists "$1"; then :; else > "$1"; fi
-=======
-  if fileExists "$1"; then :; else touch "$1"; fi
->>>>>>> 694577d5c068ef51a9dadf06b61079f39d1f2359
 }
 
 function makeMultipleFiles(){
