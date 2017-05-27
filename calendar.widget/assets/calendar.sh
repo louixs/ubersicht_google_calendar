@@ -98,10 +98,10 @@ function getEventsById(){
   # Accepts 1 argument
   # $1 = calendar ID
   todayStart=$(date -u +"%Y-%m-%dT00:00:00")
-  todayEnd=$(date -u +"%Y-%m-%dT23:59:59")
+  todayEnd=$(date -v +1d -u +"%Y-%m-%dT00:00:00") # google cal has exclusive end date
   
   tmrwStart=$(date -v +1d -u +"%Y-%m-%dT00:00:00")
-  tmrwEnd=$(date -v +1d -u +"%Y-%m-%dT23:59:59")
+  tmrwEnd=$(date -v +2d -u +"%Y-%m-%dT00:00:00") # google cal has exclusive end date
   
   local todayUrl=$( makeCalUrl $1 $todayStart $todayEnd )
   local tmrwUrl=$( makeCalUrl $1 $tmrwStart $tmrwEnd )
