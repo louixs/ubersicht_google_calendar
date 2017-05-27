@@ -61,7 +61,14 @@ This widget especially the oauth.sh is still at beta stage. Please use at your o
 ## To-do:
 - fix sorting; sorting of the event is not in the order of time but number at the moment
 - Add locations?
+- enable switch view feature
+ - now you can only see today's and tomorrow's events
+ - add weekly view
 
 ## Changelog
 - abolished google oauth credentials file for users and moved the credential location back to .coffee file for the ease for users
 - changed the location of google oauth credentials due to the security and ease of development and deployment
+
+
+## Issues:
+- Skips one day between today and tomorrow

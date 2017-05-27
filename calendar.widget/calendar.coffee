@@ -45,9 +45,8 @@ render: (output) -> """
 """
 
 update: (output, domEl)-> 
-  show=(item)->
+  show=(item)-> # for debugging
     console.log(item)
-  #--
 
   #zip #https://cedricruiz.me/blog/functional-coffeescript-for-the-impatient/
   zip = (xss...) -> xss[0].map (_, i) -> xss.map (xs) -> xs[i]
@@ -73,7 +72,7 @@ update: (output, domEl)->
       return hoursMinsParsed
 
   parseTime=(arr)->
-    _.map(arr, (innerArr)->
+    _.map(arr, (innerArr)-> # O(N^2); improve
         _.map(innerArr, (item)->                                    
                if item == "All Day"
                  return item               
@@ -181,7 +180,6 @@ update: (output, domEl)->
     for element,index in arr
       itemToAdd="<div class=item#{index}>#{arr[index].join(" ")}</div>" 
       $(domEl).find(".container").append(itemToAdd)
-  #--
 
   addStrToDom = (title, str) ->
     titleToAdd=makeHTMLTitle(title)
@@ -231,7 +229,6 @@ update: (output, domEl)->
        addErrMsgToDom(errMsg)
      else
        addCalItemsToDom()       
-   #--
 
   showCalendarItemsIfErrorFree()
     

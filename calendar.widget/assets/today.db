@@ -1,0 +1,1 @@
+{ "kind": "calendar#events", "etag": "\"p33ganrmhsu7t80g\"", "summary": "Ryuei", "updated": "2017-05-27T09:57:10.380Z", "timeZone": "Europe/London", "accessRole": "owner", "defaultReminders": [ { "method": "popup", "minutes": 30 }, { "method": "email", "minutes": 10 } ], "items": [] }

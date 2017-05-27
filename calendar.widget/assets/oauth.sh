@@ -7,17 +7,6 @@
 # ====     Google Oauth2 
 # =============================
 
-
-function setWorkingDir(){
-  if [ ! -e run.sh ]; then
-    cd assets
-  else
-    :
-  fi
-}
-
-setWorkingDir
-
 # -- For debugging 
 source debugLogger.sh
 # Debug function to trace all scripts run below it
@@ -31,8 +20,6 @@ function readCredVar(){ #rename as this is confusing this applies to extracting 
   echo "$credVar"
 }
 
-
-
 # Set initial variables these should not be mutated
 declare -rx PARENT_DIR=${PWD%/*}
 readonly COFFEE_FILE_NAME=$(ls ../ | grep .coffee)
@@ -40,6 +27,7 @@ declare -rx COFFEE_FILE="$PARENT_DIR"/"$COFFEE_FILE_NAME"
 declare -rx three_DIR_UP=${PWD%/*/*/*}
 declare -rx GOOGLE_APP=$( readCredVar "$COFFEE_FILE" GOOGLE_APP )
 declare -rx DEV_CONFIG_FILE="$three_DIR_UP"/google_oauth_"$GOOGLE_APP".config
+
 
 declare -rx SIGNAL_FILE=signal.db
 declare -rx TOKEN_FILE=token.db
@@ -76,7 +64,7 @@ function fileExists(){
 
 #Function that creates a file if the said file does not exist in the same directory
 function makeFileIfNone(){
-  if fileExists "$1"; then :; else > "$1"; fi
+  if fileExists "$1"; then :; else touch "$1"; fi
 }
 
 function makeMultipleFiles(){
@@ -86,20 +74,20 @@ function makeMultipleFiles(){
   local file
   for file in "$1"
   do
-    makeFileIfNone $file
+    makeFileIfNone "$file"
   done
 }
 
 function overrideLog(){
-  echo "$(timeNow) ${1}" > $LOG_FILE
+  echo "$(timeNow) ${1}" > "$LOG_FILE"
 }
 
 function appendToLog(){
-  echo "$(timeNow) ${1}" >> $LOG_FILE
+  echo "$(timeNow) ${1}" >> "$LOG_FILE"
 }
 
 function signalGetAccessToken(){
-  echo 'get' > $SIGNAL_FILE
+  echo 'get' > "$SIGNAL_FILE"
   # write 'get' to indicate a signal to get access token next time this script file runs
 }
 
@@ -197,9 +185,9 @@ function credCheck(){
 function checkAuthCode(){
   assignCredentialVars
   
-  if  ([ -s "$CONFIG_FILE" ] && [ $AUTHORIZATION_CODE ]); then
+  if  ([ -s "$CONFIG_FILE" ] && [ "$AUTHORIZATION_CODE" ]); then
     :
-  elif ([ -s "$CONFIG_FILE" ] && [ -n $AUTHORIZATION_CODE ]); then
+  elif ([ -s "$CONFIG_FILE" ] && [ -n "$AUTHORIZATION_CODE" ]); then
   # Authorization code should be needed only once first
   # once it is retrived and a valid access token is issued together with a refresh token
   # the refresh token should be used to re-new access token once it expired
@@ -221,15 +209,15 @@ function readSignal(){
 
 function removeSignalFile(){
   if [ -s "$SIGNAL_FILE" ]; then
-     rm $SIGNAL_FILE
+     rm "$SIGNAL_FILE"
   else
     :
   fi
 }
 
 function checkRefreshToken(){
-  REFRESH_TOKEN=$(sed -e 1b $R_TOKEN_FILE | grep refresh_token | sed 's/.*://' | xargs)
-  local refresh_token_exists=$(varExists $REFRESH_TOKEN)
+  REFRESH_TOKEN=$(sed -e 1b "$R_TOKEN_FILE" | grep refresh_token | sed 's/.*://' | xargs)
+  local refresh_token_exists=$(varExists "$REFRESH_TOKEN")
   if [ "${refresh_token_exists}" -eq 1 ]; then      
     # curl -sd "refresh_token=$REFRESH_TOKEN&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&grant_type=refresh_token" https://www.googleapis.com/oauth2/v4/token > $TOKEN_FILE
     # #re-assign access_token to the updated one
@@ -255,16 +243,16 @@ function getToken(){
   if ([ -s "$SIGNAL_FILE" ] && [ "$signal_var" == 'get' ]) || [ ! -n "$tokenFileContent" ] || [ "$tokenValidity" == "invalid_grant" ]; then
       # if the signal says get then get token first
       #get token into the file and assign variables accordingly
-      curl -sd "code=$AUTHORIZATION_CODE&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&redirect_uri=$REDIRECT_URI&grant_type=authorization_code&access_type=offline" https://www.googleapis.com/oauth2/v4/token > $TOKEN_FILE
+      curl -sd "code=$AUTHORIZATION_CODE&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&redirect_uri=$REDIRECT_URI&grant_type=authorization_code&access_type=offline" https://www.googleapis.com/oauth2/v4/token > "$TOKEN_FILE"
       local new_access_token=$(cat "$TOKEN_FILE" | grep access_token | awk '{print $2}' | tr -d \",)
       local new_refresh_token=$(cat "$TOKEN_FILE" | grep refresh_token | awk '{print $2}' | tr -d \",)
-      local refresh_token_exists=$(varExists $new_refresh_token)
+      local refresh_token_exists=$(varExists "$new_refresh_token")
 
       if [ "$refresh_token_exists" -eq 1 ] ; then
         # check if the newly retrieved token actually exists to make sure        
         # write refresh token to the r_token.db file
-        echo "refresh_token:$new_refresh_token" > $R_TOKEN_FILE
-        ACCESS_TOKEN=$new_access_token
+        echo "refresh_token:$new_refresh_token" > "$R_TOKEN_FILE"
+        ACCESS_TOKEN="$new_access_token"
         REFRESH_TOKEN=$(sed -e 1b "$R_TOKEN_FILE" | grep refresh_token | sed 's/.*://' | xargs)
         removeSignalFile
       else
@@ -272,7 +260,7 @@ function getToken(){
         signalGetAccessToken
         echo 2
         sleep 3
-        open $AUTH_URL
+        open "$AUTH_URL"
         exit 1
       fi    
 
@@ -294,24 +282,24 @@ function tokenExists(){
     removeSignalFile
   elif ([ -s "$TOKEN_FILE" ] && [ -n "${ACCESS_TOKEN}" ]); then
     # if refresh token exists, use refresh token to get access token
-    refresh_token_exists=$(varExists $REFRESH_TOKEN)
+    refresh_token_exists=$(varExists "$REFRESH_TOKEN")
     removeSignalFile
     if [ "${refresh_token_exists}" -eq 1 ]; then
-       local new_token=$(curl -sd "refresh_token=$REFRESH_TOKEN&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&grant_type=refresh_token" https://www.googleapis.com/oauth2/v4/token) > $TOKEN_FILE
+       local new_token=$(curl -sd "refresh_token=$REFRESH_TOKEN&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&grant_type=refresh_token" https://www.googleapis.com/oauth2/v4/token) > "$TOKEN_FILE"
       #re-assign access_token to the updated one        
-       local new_access_token=$(cat $TOKEN_FILE | grep access_token | awk '{print $2}' | tr -d \",)
-       local new_refresh_token=$(cat $TOKEN_FILE | grep refresh_token | awk '{print $2}' | tr -d \",)
+       local new_access_token=$(cat "$TOKEN_FILE" | grep access_token | awk '{print $2}' | tr -d \",)
+       local new_refresh_token=$(cat "$TOKEN_FILE" | grep refresh_token | awk '{print $2}' | tr -d \",)
 
        # check if the new access token exists to see if the valid authorization code was used
        # if the new access token is empty, need to get a new authorization and then get a new access token
-       local token_exists=$(varExists $new_access_token)
+       local token_exists=$(varExists "$new_access_token")
        
        if [ "${token_exists}" -eq 1 ]; then
          #save refresh_token to file
          echo "refresh_token:$new_refresh_token" > r_token.db
          #assign token
-         ACCESS_TOKEN=$new_access_token
-         REFRESH_TOKEN=$(sed -e 1b $R_TOKEN_FILE | grep refresh_token | sed 's/.*://' | xargs)
+         ACCESS_TOKEN="$new_access_token"
+         REFRESH_TOKEN=$(sed -e 1b "$R_TOKEN_FILE" | grep refresh_token | sed 's/.*://' | xargs)
          removeSignalFile
          exit 0
        else
@@ -319,7 +307,7 @@ function tokenExists(){
          echo "Once the code is pasted in , re-run this script"         
          signalGetAccessToken
          sleep 3         
-         open $AUTH_URL         
+         open "$AUTH_URL"         
          exit 1 
        fi    
     else
@@ -329,7 +317,7 @@ function tokenExists(){
       echo "Once the code is pasted in , re-run this script"
       signalGetAccessToken
       sleep 3
-      open $AUTH_URL
+      open "$AUTH_URL"
       
       exit 1
     fi   
@@ -348,11 +336,11 @@ function checkTokenStatus(){
       exit 0 #0 success exit      
     else
     # if the acess token is expired, get the new access key using the refresh token
-      refresh_token_exists=$(varExists $REFRESH_TOKEN)
+      refresh_token_exists=$(varExists "$REFRESH_TOKEN")
 
       if [ "${refresh_token_exists}" -eq 1 ]; then
       
-        curl -sd "refresh_token=$REFRESH_TOKEN&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&grant_type=refresh_token" https://www.googleapis.com/oauth2/v4/token > $TOKEN_FILE
+        curl -sd "refresh_token=$REFRESH_TOKEN&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&grant_type=refresh_token" https://www.googleapis.com/oauth2/v4/token > "$TOKEN_FILE"
       #re-assign access_token to the updated one
         ACCESS_TOKEN=$(cat "$TOKEN_FILE" | grep access_token | awk '{print $2}' | tr -d \",)
       else

@@ -12,7 +12,7 @@ function runDebugLogger(){
   activate_debug_logger
 }
 # Uncomment the below to enalbe the debugger
-runDebugLogger
+# runDebugLogger
 
 function setWorkingDir(){
   if [ ! -e oauth.sh ]; then

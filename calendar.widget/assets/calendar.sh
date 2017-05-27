@@ -51,11 +51,6 @@ readonly COFFEE_FILE="$PARENT_DIR"/"$COFFEE_FILE_NAME"
 readonly GOOGLE_APP=$( readCredVar "$COFFEE_FILE" GOOGLE_APP )
 readonly CONFIG_FILE="$three_DIR_UP"/google_oauth_"$GOOGLE_APP".config
 
-echo "$COFFEE_FILE_NAME" > testtest
-echo "$COFFEE_FILE" >> testtest
-echo "$GOOGLE_APP" >> testtest
-echo "$CONFIG_FILE" >> testtest
-
 function setVars(){
   whereAwk=$(which awk)
   whereCat=$(which cat)
@@ -102,11 +97,11 @@ function getEventName(){
 function getEventsById(){
   # Accepts 1 argument
   # $1 = calendar ID
-  todayStart=$(date -u +"%Y-%m-%dT00:00:00Z")
-  todayEnd=$(date -u +"%Y-%m-%dT23:59:59Z")
+  todayStart=$(date -u +"%Y-%m-%dT00:00:00")
+  todayEnd=$(date -u +"%Y-%m-%dT23:59:59")
   
-  tmrwStart=$(date -v +1d -u +"%Y-%m-%dT00:00:00Z")
-  tmrwEnd=$(date -v +1d -u +"%Y-%m-%dT23:59:59Z")
+  tmrwStart=$(date -v +1d -u +"%Y-%m-%dT00:00:00")
+  tmrwEnd=$(date -v +1d -u +"%Y-%m-%dT23:59:59")
   
   local todayUrl=$( makeCalUrl $1 $todayStart $todayEnd )
   local tmrwUrl=$( makeCalUrl $1 $tmrwStart $tmrwEnd )
