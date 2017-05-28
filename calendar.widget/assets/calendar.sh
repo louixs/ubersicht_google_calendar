@@ -97,11 +97,11 @@ function getEventName(){
 function getEventsById(){
   # Accepts 1 argument
   # $1 = calendar ID
-  todayStart=$(date -u +"%Y-%m-%dT00:00:00z")
-  todayEnd=$(date -u +"%Y-%m-%dT23:59:59z")
+  todayStart=$(date -u +"%Y-%m-%dT00:00:00.000z")
+  todayEnd=$(date -u +"%Y-%m-%dT23:59:59.000z")
   
-  tmrwStart=$(date -v +1d -u +"%Y-%m-%dT00:00:00z")
-  tmrwEnd=$(date -v +1d -u +"%Y-%m-%dT23:59:59z")
+  tmrwStart=$(date -v +1d -u +"%Y-%m-%dT00:00:00.000z")
+  tmrwEnd=$(date -v +1d -u +"%Y-%m-%dT23:59:59.000z")
   
   local todayUrl=$( makeCalUrl $1 $todayStart $todayEnd )
   local tmrwUrl=$( makeCalUrl $1 $tmrwStart $tmrwEnd )

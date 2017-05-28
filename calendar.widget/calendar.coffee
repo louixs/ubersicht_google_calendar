@@ -110,8 +110,7 @@ update: (output, domEl)->
   
   zipTimeAndEvent=(data,pos)->
     inputData=data[pos]    
-    time=getStartEndTime(inputData)
-    show inputData
+    time=getStartEndTime(inputData)    
     eventName=inputData.split("§-§")[1].split("+|+")
     arr= zip time, eventName    
     return arr
@@ -203,10 +202,10 @@ update: (output, domEl)->
     sortedTmrwArr=sortArrForDisplay(tmrwArr)
      
     addToday=()->
-      addItemsFilterNoEventsDay(sortedTodayArr, "--Today-----")
+      addItemsFilterNoEventsDay(sortedTodayArr, "-- Today -----")
               
      addTmrw=()->
-      addItemsFilterNoEventsDay(sortedTmrwArr, "<br> --Tomorrow--")
+      addItemsFilterNoEventsDay(sortedTmrwArr, "<br> -- Tomorrow --")
     addToday()
     addTmrw()
 
