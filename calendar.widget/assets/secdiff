@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# provided by Don Cragun from http://www.unix.com/shell-programming-and-scripting/209549-script-subtract-time-stored-variable.html
+
+# secdiff -- calculate seconds between two timestamps
+# secdiff [start_time [end_time]]
+# Calculate the number of seconds between start_time and end_time.  Both
+# timestamps must be in the form:
+#               HH:MM:SS
+# with HH, MM, and SS each being two digit decimal strings representing the
+# hours, minutes, and seconds, respectively, since midnight using 24 hour clock
+# notation.  If end_time is earlier in the day than start_time, end_time is
+# assumed to be on the day after start_time.  This utility does not work
+# correctly if there is a shift to or from daylight savings time between
+# start_time and end_time.
+
+# Set t1 and t2 to $1 and $2 with default values from the given test case.
+t1=${1:-11:48:30}
+t2=${2:-13:13:48}
+t1s=${t1##*:}   # Extract the seconds from $t1
+t1h=${t1%%:*}   # Extract the hours from $t1
+t1m=${t1%:*}    # Extract the minutes from $t1 (step 1)
+t1m=${t1m#*:}   # Extract the minutes from $t1 (step 2)
+t1ssm=$((t1h * 3600 + t1m * 60 + t1s)) # Calculate $t1 seconds since midnight
+t2s=${t2##*:}   # Perform the same operations on $t2
+t2h=${t2%%:*}
+t2m=${t2%:*}
+t2m=${t2m#*:}
+t2ssm=$((t2h * 3600 + t2m * 60 + t2s))
+if [ $t1ssm -gt $t2ssm ] # If $t1ssm > $t2ssm, $t2 must be on the next day
+then    t2ssm=$((t2ssm + 60 * 60 * 24))
+fi
+printf "%s is %d seconds after %s\n" $t2 $((t2ssm - t1ssm)) $t1
