@@ -99,27 +99,8 @@ function getEventsById(){
   # Accepts 1 argument
   # $1 = calendar ID
 
-  # todo 
- # get timezone from the calendar list and put it into timezone offset
-  #machineTimeZoneOffset=$(date +"%z" | sed 's/./&:/3') # this produces the time offset like +01:00
-  # made a parser function that detects timezone of your PC, which can be used to do date modification -> ./timezone.sh ; if your timezone was +0100, it returns a reversed -1H, cuz for this google calendar api, you need to subtract or add from your time when requesting 
-  
-  # date calculation, see https://stackoverflow.com/questions/20688664/bash-script-command-to-print-out-date-5-min-before-after
-  # second answer by chepner
-  
-  # start from here again
-  # googles documentation sucks but you need Z
-  # next, this is sending UTC but it's not filtering correctly reflecting my timezone
-
-  # date -jf "%Y%m%d%H%M%S" $DATE +"%Y-%m-%dT%H:%M:%SZ"
-  # ./timezone
-
-  # staging the previous vars just in case
-  #todayStart=$(date +"%Y-%m-%dT00:00:00Z")
-  #todayEnd=$(date +"%Y-%m-%dT23:59:59Z")
-  #tmrwStart=$(date -v +1d +"%Y-%m-%dT00:00:00Z")  
-  #tmrwEnd=$(date -v +1d +"%Y-%m-%dT23:59:59Z")
-
+  # custom function encapsulated in timezone.sh
+  # the function converts the date adjusting to user's shell ENV's timezone
   todayStart=$(./timezone.sh $(date +"%Y%m%d000000"))
   todayEnd=$(./timezone.sh $(date +"%Y%m%d235959"))
     

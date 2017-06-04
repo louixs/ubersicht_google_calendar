@@ -11,7 +11,7 @@
 source debugLogger.sh
 # Debug function to trace all scripts run below it
 # uncomment the below to enable the debugger:
-# activate_debug_logger
+activate_debug_logger
 
 function readCredVar(){ #rename as this is confusing this applies to extracting all values in a file after a colon :
   #$1 = file name 
@@ -354,7 +354,7 @@ function checkTokenStatus(){
 assignCredentialVars
 
 # Make necessary files if they don't exist
-makeMultipleFiles "$TOKEN_FILE $R_TOKEN_FILE"
+makeMultipleFiles "$TOKEN_FILE" "$R_TOKEN_FILE"
 
 # Check if credntials are filled in
 # .coffee is where you store your CLIENT_ID, CLINET_SECRET and Authorization_code

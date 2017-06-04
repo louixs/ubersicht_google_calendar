@@ -23,8 +23,7 @@ function calculate(){
   
   # if plus, subtract
   if [ "$prefix" = "+" ]; then
-    result=$(( $base_sec - $offset_sec))
-    
+    result=$(( $base_sec - $offset_sec))  
   else
     result=$(( $base_sec + $offset_sec))
   fi
