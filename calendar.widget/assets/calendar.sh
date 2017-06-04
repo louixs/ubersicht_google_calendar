@@ -113,16 +113,19 @@ function getEventsById(){
 
   # date -jf "%Y%m%d%H%M%S" $DATE +"%Y-%m-%dT%H:%M:%SZ"
   # ./timezone
-  
+
+  # staging the previous vars just in case
   #todayStart=$(date +"%Y-%m-%dT00:00:00Z")
   #todayEnd=$(date +"%Y-%m-%dT23:59:59Z")
-  todayStart_stage=
+  #tmrwStart=$(date -v +1d +"%Y-%m-%dT00:00:00Z")  
+  #tmrwEnd=$(date -v +1d +"%Y-%m-%dT23:59:59Z")
+
   todayStart=$(./timezone.sh $(date +"%Y%m%d000000"))
   todayEnd=$(./timezone.sh $(date +"%Y%m%d235959"))
-  
-  tmrwStart=$(date -v +1d +"%Y-%m-%dT00:00:00Z")
-  tmrwEnd=$(date -v +1d +"%Y-%m-%dT23:59:59Z")
-  
+    
+  tmrwStart=$(./timezone.sh $(date -v +1d +"%Y%m%d000000"))
+  tmrwEnd=$(./timezone.sh $(date -v +1d +"%Y%m%d235959"))
+
   local todayUrl=$( makeCalUrl $1 $todayStart $todayEnd )
   local tmrwUrl=$( makeCalUrl $1 $tmrwStart $tmrwEnd )
   local today=$( getCal $todayUrl )
