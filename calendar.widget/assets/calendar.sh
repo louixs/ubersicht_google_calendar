@@ -18,7 +18,7 @@ function runDebugLogger(){
 }
 
 # Uncomment the below to enalbe the debugger
-runDebugLogger
+#runDebugLogger
 
 # If any error occurs, exit a script with exit 1
 function exitIfFail(){
