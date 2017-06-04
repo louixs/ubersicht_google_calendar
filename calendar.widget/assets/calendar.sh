@@ -18,7 +18,7 @@ function runDebugLogger(){
 }
 
 # Uncomment the below to enalbe the debugger
-# runDebugLogger
+runDebugLogger
 
 # If any error occurs, exit a script with exit 1
 function exitIfFail(){
@@ -82,6 +82,7 @@ function makeCalUrl(){
     # $3 date in ISO8601 format
     local orderBy="startTime"
     echo "https://www.googleapis.com/calendar/v3/calendars/$1/events/?timeMin=$2&timeMax=$3&singleEvents=true&orderBy=$orderBy"
+    #echo "https://www.googleapis.com/calendar/v3/calendars/$1/events/?singleEvents=true&timeMin=$2&timeMax=$3"
 }
 
 function getEventTime(){
@@ -97,11 +98,30 @@ function getEventName(){
 function getEventsById(){
   # Accepts 1 argument
   # $1 = calendar ID
-  todayStart=$(date -u +"%Y-%m-%dT00:00:00.000z")
-  todayEnd=$(date -u +"%Y-%m-%dT23:59:59.000z")
+
+  # todo 
+ # get timezone from the calendar list and put it into timezone offset
+  #machineTimeZoneOffset=$(date +"%z" | sed 's/./&:/3') # this produces the time offset like +01:00
+  # made a parser function that detects timezone of your PC, which can be used to do date modification -> ./timezone.sh ; if your timezone was +0100, it returns a reversed -1H, cuz for this google calendar api, you need to subtract or add from your time when requesting 
   
-  tmrwStart=$(date -v +1d -u +"%Y-%m-%dT00:00:00.000z")
-  tmrwEnd=$(date -v +1d -u +"%Y-%m-%dT23:59:59.000z")
+  # date calculation, see https://stackoverflow.com/questions/20688664/bash-script-command-to-print-out-date-5-min-before-after
+  # second answer by chepner
+  
+  # start from here again
+  # googles documentation sucks but you need Z
+  # next, this is sending UTC but it's not filtering correctly reflecting my timezone
+
+  # date -jf "%Y%m%d%H%M%S" $DATE +"%Y-%m-%dT%H:%M:%SZ"
+  # ./timezone
+  
+  #todayStart=$(date +"%Y-%m-%dT00:00:00Z")
+  #todayEnd=$(date +"%Y-%m-%dT23:59:59Z")
+  todayStart_stage=
+  todayStart=$(./timezone.sh $(date +"%Y%m%d000000"))
+  todayEnd=$(./timezone.sh $(date +"%Y%m%d235959"))
+  
+  tmrwStart=$(date -v +1d +"%Y-%m-%dT00:00:00Z")
+  tmrwEnd=$(date -v +1d +"%Y-%m-%dT23:59:59Z")
   
   local todayUrl=$( makeCalUrl $1 $todayStart $todayEnd )
   local tmrwUrl=$( makeCalUrl $1 $tmrwStart $tmrwEnd )
