@@ -11,7 +11,7 @@
 source debugLogger.sh
 # Debug function to trace all scripts run below it
 # uncomment the below to enable the debugger:
-activate_debug_logger
+# activate_debug_logger
 
 function readCredVar(){ #rename as this is confusing this applies to extracting all values in a file after a colon :
   #$1 = file name 
