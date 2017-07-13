@@ -159,7 +159,7 @@ function getCalendarNames(){
   elif [ "${coffee_file_calendar_names_exist}" -eq 1 ]; then
     local calendar_names="$coffee_file_calendar_names"
   else
-    :
+    echo "Please provide your credentials in the calendar.coffee file"
   fi
        
   echo "$calendar_names"
