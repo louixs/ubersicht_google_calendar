@@ -216,7 +216,9 @@ function removeSignalFile(){
 }
 
 function checkRefreshToken(){
-  REFRESH_TOKEN=$(sed -e 1b "$R_TOKEN_FILE" | grep refresh_token | sed 's/.*://' | xargs)
+  #if fileExists "$R_TOKEN_FILE"; then    
+    REFRESH_TOKEN=$(sed -e 1b "$R_TOKEN_FILE" | grep refresh_token | sed 's/.*://' | xargs)
+  #fi
   local refresh_token_exists=$(varExists "$REFRESH_TOKEN")
   if [ "${refresh_token_exists}" -eq 1 ]; then      
     # curl -sd "refresh_token=$REFRESH_TOKEN&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&grant_type=refresh_token" https://www.googleapis.com/oauth2/v4/token > $TOKEN_FILE

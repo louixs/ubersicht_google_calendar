@@ -160,7 +160,7 @@ function getCalendarNames(){
   if fileExists "$COFFEE_FILE"; then
      local coffee_file_calendar_names=$(sed -e 1b "$COFFEE_FILE" | grep CALENDAR_NAME | sed 's/.*://' | xargs);
   else
-    echo "Please provide your credentials in the calendar.coffee file"
+    echo echo "Please provide your credentials in the calendar.coffee file"
   fi
 
   if fileExists "$CONFIG_FILE"; then
