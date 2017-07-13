@@ -38,7 +38,6 @@ command:"""
 refreshFrequency: '30m' #30 min.
 #Other permitted formats: '2 days', '1d', '10h', '2.5 hrs', '2h', '1m', or '5s'
 
-#<div id="divider">~~~~~~~~~~~~~~~~</div>
 render: (output) -> """  
   <div class="container"></div>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
@@ -167,11 +166,9 @@ update: (output, domEl)->
     cleanedArr=removeEmptyItem(sortedArr)
     formattedArr=addSpaceToAllDay(cleanedArr)
     return formattedArr
-  #--
 
   makeHTMLTitle=(title)->
-    return titleToAdd="<div class=title>#{title}</div>"
-    
+    return titleToAdd="<div class=title>#{title}</div>"    
   
   addArrToDom = (title,arr)->
     titleToAdd=makeHTMLTitle(title)
