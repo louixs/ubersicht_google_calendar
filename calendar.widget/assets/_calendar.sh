@@ -18,7 +18,7 @@ function runDebugLogger(){
 }
 
 # Uncomment the below to enalbe the debugger
-# runDebugLogger
+#runDebugLogger
 
 # If any error occurs, exit a script with exit 1
 function exitIfFail(){
@@ -64,15 +64,6 @@ function setVars(){
 }
 
 setVars
-
-function fileExists(){
-  # check if the variable exists or not
-  if [ -f "$1" ] && [ -n "$1" ] ; then
-     return 0 # file exists
-  else
-     return 1 # file does not exist
-  fi
-}
 
 getCal(){
   curl -sH "Authorization: Bearer $ACCESS_TOKEN" $1
@@ -155,18 +146,9 @@ function varExists(){
   fi
 }
 
-function getCalendarNames(){
-  
-  if fileExists "$COFFEE_FILE"; then
-     local coffee_file_calendar_names=$(sed -e 1b "$COFFEE_FILE" | grep CALENDAR_NAME | sed 's/.*://' | xargs);
-  else
-    echo "Please provide your credentials in the calendar.coffee file"
-  fi
-
-  if fileExists "$CONFIG_FILE"; then
-    local config_file_calendar_names=$(sed -e 1b "$CONFIG_FILE" | grep CALENDAR_NAME | sed 's/.*://' | xargs)
-  else :
-  fi
+function getCalendarNames(){  
+  local coffee_file_calendar_names=$(sed -e 1b "$COFFEE_FILE" | grep CALENDAR_NAME | sed 's/.*://' | xargs)
+  local config_file_calendar_names=$(sed -e 1b "$CONFIG_FILE" | grep CALENDAR_NAME | sed 's/.*://' | xargs)
   
   config_file_calendar_names_exist=$(varExists "$config_file_calendar_names")
 
@@ -177,7 +159,7 @@ function getCalendarNames(){
   elif [ "${coffee_file_calendar_names_exist}" -eq 1 ]; then
     local calendar_names="$coffee_file_calendar_names"
   else
-    :
+    echo "Please provide your credentials in the calendar.coffee file"
   fi
        
   echo "$calendar_names"
