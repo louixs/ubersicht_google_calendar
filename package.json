@@ -5,13 +5,14 @@
   "description": "Übersicht widget that shows upcoming Google Calendar events",
   "license": "MIT",
   "type": "module",
+  "packageManager": "pnpm@10.28.1",
   "scripts": {
     "build": "node esbuild.config.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "auth": "node esbuild.config.mjs --only=setup && node calendar.widget/lib/authorize.js",
-    "package": "npm run build && npm run test && zip -r ubersicht-google-calendar.widget.zip calendar.widget/index.jsx calendar.widget/lib calendar.widget/package.json -x '*.DS_Store'",
-    "postinstall": "npm run build"
+    "package": "pnpm run build && pnpm run test && zip -r ubersicht-google-calendar.widget.zip calendar.widget/index.jsx calendar.widget/lib calendar.widget/package.json -x '*.DS_Store'",
+    "postinstall": "pnpm run build"
   },
   "dependencies": {
     "google-auth-library": "^9.0.0",

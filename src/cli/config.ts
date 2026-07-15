@@ -40,7 +40,7 @@ export function ensureConfigDir(): string {
 export function loadConfig(path: string = getConfigPath()): Config {
   if (!existsSync(path)) {
     throw new ConfigError(
-      `Config file not found at ${path}. Run \`npm run auth\` to set it up.`,
+      `Config file not found at ${path}. Run \`pnpm run auth\` to set it up.`,
     );
   }
 

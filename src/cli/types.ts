@@ -20,7 +20,7 @@ export type Config = z.infer<typeof ConfigSchema>;
  * OAuth2 token set, stored at
  * ~/.config/ubersicht-google-calendar/token.json
  *
- * Written only by `npm run auth` (initial grant) and by the automatic
+ * Written only by `pnpm run auth` (initial grant) and by the automatic
  * refresh listener in auth.ts (re-persisted on rotation).
  */
 export const TokenSetSchema = z.object({

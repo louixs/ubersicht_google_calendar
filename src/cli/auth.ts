@@ -13,7 +13,7 @@ export const CALENDAR_READONLY_SCOPE = 'https://www.googleapis.com/auth/calendar
 export function loadToken(path: string = getTokenPath()): TokenSet {
   if (!existsSync(path)) {
     throw new AuthError(
-      `Token file not found at ${path}. Run \`npm run auth\` to authorize this app.`,
+      `Token file not found at ${path}. Run \`pnpm run auth\` to authorize this app.`,
     );
   }
 
@@ -34,7 +34,7 @@ export function loadToken(path: string = getTokenPath()): TokenSet {
   const result = TokenSetSchema.safeParse(parsed);
   if (!result.success) {
     throw new AuthError(
-      `Token file at ${path} is invalid. Re-run \`npm run auth\` to re-authorize.`,
+      `Token file at ${path} is invalid. Re-run \`pnpm run auth\` to re-authorize.`,
     );
   }
 
@@ -43,7 +43,7 @@ export function loadToken(path: string = getTokenPath()): TokenSet {
 
 /**
  * Persists token.json with 0600 permissions. Called both by the initial
- * `npm run auth` grant and by the automatic refresh listener below — every
+ * `pnpm run auth` grant and by the automatic refresh listener below — every
  * write is hardened, not just the first one.
  */
 export function saveToken(token: TokenSet, path: string = getTokenPath()): void {

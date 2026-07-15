@@ -32,16 +32,16 @@ if you're curious about the architecture; otherwise skip to Setup.
 ### 2. Install dependencies
 
 ```sh
-npm install
+pnpm install
 ```
 
-`npm install` also runs `npm run build` automatically (via `postinstall`),
+`pnpm install` also runs `pnpm run build` automatically (via `postinstall`),
 producing the compiled widget files described in "How it works" below.
 
 ### 3. Authorize (one-time)
 
 ```sh
-npm run auth
+pnpm run auth
 ```
 
 This is an interactive command you run once from a terminal — it is never
@@ -60,13 +60,13 @@ the flow completes automatically — no authorization code to copy/paste.
 Config and token are written to `~/.config/ubersicht-google-calendar/`
 (`config.json`, `token.json`), with `token.json` permissioned `0600`.
 
-You can re-run `npm run auth` at any time to change calendars, formatting,
+You can re-run `pnpm run auth` at any time to change calendars, formatting,
 or re-authorize from scratch.
 
 ### 4. Build and install the widget
 
 ```sh
-npm run build
+pnpm run build
 ```
 
 Then copy (or symlink) the `calendar.widget/` folder into Übersicht's
@@ -82,7 +82,7 @@ restart Übersicht) if the calendar doesn't appear within a minute.
 ### 5. (Optional) Build a distributable zip
 
 ```sh
-npm run package
+pnpm run package
 ```
 
 Builds, runs the test suite, and produces `ubersicht-google-calendar.widget.zip`
@@ -93,7 +93,7 @@ useful for sharing a ready-to-install artifact without the source tree.
 
 Events are bucketed into "today" and "tomorrow" using your calendar's own
 timezone (Google Calendar > Settings > **Calendar Time Zone**), or the
-`timezoneOverride` you set during `npm run auth` if you'd rather pin it
+`timezoneOverride` you set during `pnpm run auth` if you'd rather pin it
 explicitly. Day boundaries are computed with real timezone-aware date math
 (via `luxon`), so this is correct across DST transitions and non-hour
 UTC offsets (e.g. India's +5:30, Nepal's +5:45) — the old shell script's
@@ -103,8 +103,8 @@ UTC offsets (e.g. India's +5:30, Nepal's +5:45) — the old shell script's
 
 The widget prints structured errors instead of failing silently:
 
-- **"Config file not found..."** — run `npm run auth`.
-- **"Token file not found..."** — run `npm run auth`.
+- **"Config file not found..."** — run `pnpm run auth`.
+- **"Token file not found..."** — run `pnpm run auth`.
 - **"Calendar(s) not found..."** — the name(s) in your config don't
   exactly match a calendar in your Google account (case-sensitive); the
   error lists the calendars actually available so you can fix a typo.
@@ -125,17 +125,17 @@ and the CoffeeScript render layer, except both halves are now TypeScript:
   Bundled by esbuild (JSX left untouched — Übersicht's own babel pass
   transforms it at widget-load time) into `calendar.widget/index.jsx`.
 - **`src/setup/authorize.ts`** — the one-time interactive OAuth loopback
-  flow behind `npm run auth`. Bundled into `calendar.widget/lib/authorize.js`.
+  flow behind `pnpm run auth`. Bundled into `calendar.widget/lib/authorize.js`.
 
 Compiled output under `calendar.widget/lib/` and `calendar.widget/index.jsx`
 is build output, not committed to the repo (`.gitignore`d) — run
-`npm install && npm run build` to produce it.
+`pnpm install && pnpm run build` to produce it.
 
 ## Testing
 
 ```sh
-npm run test        # vitest — sort/format logic, timezone day-boundary math, config validation
-npm run typecheck    # tsc --noEmit
+pnpm run test        # vitest — sort/format logic, timezone day-boundary math, config validation
+pnpm run typecheck    # tsc --noEmit
 ```
 
 ## Legacy files

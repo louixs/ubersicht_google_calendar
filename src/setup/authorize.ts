@@ -9,7 +9,7 @@ import { ConfigError, type Config, type TokenSet } from '../cli/types.js';
 
 /**
  * One-time interactive OAuth loopback flow. Never invoked by Übersicht
- * itself — this is a `npm run auth` command a human runs from a terminal.
+ * itself — this is a `pnpm run auth` command a human runs from a terminal.
  * Replaces the old oauth.sh OOB flow (issue #13: OOB is dead/deprecated
  * by Google).
  */
@@ -142,7 +142,7 @@ async function main(): Promise<void> {
   if (!tokens.access_token || !tokens.refresh_token) {
     throw new Error(
       'Google did not return a refresh token. Revoke access at ' +
-        'https://myaccount.google.com/permissions and re-run `npm run auth` ' +
+        'https://myaccount.google.com/permissions and re-run `pnpm run auth` ' +
         '(this can happen on re-authorization without `prompt: consent`).',
     );
   }
