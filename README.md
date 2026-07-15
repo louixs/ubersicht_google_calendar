@@ -1,75 +1,151 @@
 # Google Calendar widget for Übersicht
-## (Übersicht Google Widgets Bundle)
 
-Here it comes, a new year and a new widget. Let's make 2017 a good year!
-
-This widget shows events for today and tomorrow based on the time zone set in your Google calendar settings. As opposed to the other widgets for google calendars, this uses Google Calendar API and Google Oauth2. This widget is a part of the Übersicht Google Suite comprising of widgets that uses Google API (other widgets are on their way).
+Shows today's and tomorrow's events for one or more Google Calendars in
+[Übersicht](http://tracesof.net/uebersicht/), sorted by real start time and
+formatted in your calendar's own timezone.
 
 ![Google Calendar](screenshot.png "Google Calendar")
 
-## Setup:
-1. Perhaps obvious but you would need a google account
-2. Go to https://console.developers.google.com > click on API Project > select Create project > fill in your project name > click on create
-3. Make sure you are in API Manager and click on Enable API and select Calendar API to enable
-4. Go to OAuth consent screen > fill in/choose your gmail address > fill in Product name shown to users with the same name that you chose in the step 2 above > make sure to save
-5. Select Credentials > select Create credentials > select OAuth client ID > select Other > fill in the name such as ubersicht > copy client ID and client secret > paste them in the calendar.coffee file after CLIENT_ID: and CLIENT_SECRET: under the Google API Credentials section. Note that you would need to store them as string i.e. surround them with ```""```.
-Your calendar.coffee file's Google API Credentials section should look like the following:
+This is a TypeScript rewrite of the original CoffeeScript widget. It replaces
+the old shell-script pipeline (`curl` + hand-rolled JSON parsing + `sed`/`awk`
+timezone arithmetic + a dead "out of band" OAuth flow) with a typed Node CLI
+that uses Google's official API client, a loopback OAuth flow, and a small
+`.jsx` render layer that Übersicht bundles itself. See "How it works" below
+if you're curious about the architecture; otherwise skip to Setup.
 
-    ```
-    CLIENT_ID: "your_client_id"
-    CLIENT_SECRET: "your_client_secret"
-    AUTHORIZATION_CODE:""
-    ```
-    
-6. Saving your script should launch a web browser asking whether you would like to allow your app to view gmail. Click Allow and the next screen will show a code. Please copy and paste it in the cred file besides AUTHORIZATION_CODE:. In case a browser does not launch please click on Refresh All Widgets option found in Ubersichts icon on your mac menu bar. At this point your calendar.coffee file's Google API Credentials section should have the following:
+## Setup
 
-    ```
-    CLIENT_ID: "your_client_id"
-    CLIENT_SECRET: "your_client_secret"
-    AUTHORIZATION_CODE: "your_authorizaion_code"
-    ```
-    
-7. Please put the name(s) of your calendar(s) that you would like to display - seperated with commnas ```,``` after calendar_name: in calendar.coffee file. Note that you would need to store them as string. Please note calendar names are case sensitive.
+### 1. Get a Google OAuth client ID/secret
 
-   ```
-   CALENDAR_NAME:"calendar 1, calendar_2, calendar 3"
-   ```
-   
-8. Save the calendar and your calendar events should now show if all goes well. If they do not show after 30 sec to 1 min. try clicking on Refresh All Widgets option.
+1. Go to https://console.developers.google.com, create (or pick) a project.
+2. Under **APIs & Services > Library**, enable the **Google Calendar API**.
+3. Under **APIs & Services > OAuth consent screen**, fill in the required
+   fields (you can leave it in "Testing" mode; add your own Google account
+   as a test user).
+4. Under **APIs & Services > Credentials**, create an **OAuth client ID**
+   of type **Desktop app** (or "Web application" with
+   `http://127.0.0.1` as an authorized redirect URI — the setup flow below
+   uses a loopback redirect on a random local port).
+5. Copy the generated **Client ID** and **Client secret** — you'll paste
+   them in during step 3 below.
 
-## Notes:
-- Make sure to name the project name (where you get your client ID and client secret) the same as the oauth product name. Else it seems to return an error when obtaining authorization code.
-- You may add calendars as you like. Please make sure the calendar names do not contain white spaces due to the current limitation. You can for instance use underscore to bind words in the calendar names.
+### 2. Install dependencies
 
-## Time Zone:
-Your calendars' timezone (Triangle on the right of your calendar > Calendar settings > Calendar Time Zone > Calendar Time zone) need to match your time zone for your Calendar Settings (Cogwheel on the right in Google Calendar > Settings > Your current time zone) for events to show correctly.
-For instance, I have set both time zones as (GMT+00:00). When they are different, All Day events may be show in both Today and Tomorrow even though they are supposed to be only for today. 
+```sh
+npm install
+```
 
-Generally if the calendar does not display even though you have filled correct client ID and clinet secret and authorization code, try to refresh ubersicht to re-read your calendar data. A network disruption while calendar data is being read could cause errors.
+`npm install` also runs `npm run build` automatically (via `postinstall`),
+producing the compiled widget files described in "How it works" below.
 
-## Lastly...
-The sample events on the screenshot are not supposed to make sense. They were written for testing purposes.
-Translation was done using the tool :http://translatr.varunmalhotra.xyz/
+### 3. Authorize (one-time)
 
-## Credits:
-parsej.sh is made by the devs at ShellShoccar-jpn. Huge thanks to ShellShoccar-jpn.
-https://github.com/ShellShoccar-jpn/Parsrs/blob/master/parsrj.sh
+```sh
+npm run auth
+```
 
-## Disclaimer:
-This widget especially the oauth.sh is still at beta stage. Please use at your own risk. I would also highly appreciate constructive feedback. Many thanks.
+This is an interactive command you run once from a terminal — it is never
+invoked by Übersicht itself. On first run it prompts for:
 
-## To-do:
-- fix sorting; sorting of the event is not in the order of time but number at the moment
-- Add locations?
-- enable switch view feature
- - now you can only see today's and tomorrow's events
- - add weekly view
+- your Google OAuth **client ID** and **client secret** (from step 1)
+- the **names of the Google Calendars** you want to display, exactly as
+  they appear in Google Calendar (case-sensitive; comma-separated if more
+  than one)
+- whether to display times in **12-hour** or **24-hour** format
+- optionally, a **timezone override** (IANA name, e.g. `America/Chicago`)
+  if you want the widget to use a timezone other than your calendar's own
 
-## Changelog
-- abolished google oauth credentials file for users and moved the credential location back to .coffee file for the ease for users
-- changed the location of google oauth credentials due to the security and ease of development and deployment
+It then opens a browser to Google's consent screen. Click **Allow**, and
+the flow completes automatically — no authorization code to copy/paste.
+Config and token are written to `~/.config/ubersicht-google-calendar/`
+(`config.json`, `token.json`), with `token.json` permissioned `0600`.
 
+You can re-run `npm run auth` at any time to change calendars, formatting,
+or re-authorize from scratch.
 
-## Issues:
-- Skips one day between today and tomorrow
+### 4. Build and install the widget
 
+```sh
+npm run build
+```
+
+Then copy (or symlink) the `calendar.widget/` folder into Übersicht's
+widgets directory:
+
+```sh
+cp -R calendar.widget "$HOME/Library/Application Support/Übersicht/widgets/"
+```
+
+Open Übersicht's menu bar icon and choose **Refresh All Widgets** (or
+restart Übersicht) if the calendar doesn't appear within a minute.
+
+### 5. (Optional) Build a distributable zip
+
+```sh
+npm run package
+```
+
+Builds, runs the test suite, and produces `ubersicht-google-calendar.widget.zip`
+containing just the compiled widget (`index.jsx`, `lib/`, `package.json`) —
+useful for sharing a ready-to-install artifact without the source tree.
+
+## Timezone behavior
+
+Events are bucketed into "today" and "tomorrow" using your calendar's own
+timezone (Google Calendar > Settings > **Calendar Time Zone**), or the
+`timezoneOverride` you set during `npm run auth` if you'd rather pin it
+explicitly. Day boundaries are computed with real timezone-aware date math
+(via `luxon`), so this is correct across DST transitions and non-hour
+UTC offsets (e.g. India's +5:30, Nepal's +5:45) — the old shell script's
+`sed`-based offset arithmetic could get this wrong.
+
+## Troubleshooting
+
+The widget prints structured errors instead of failing silently:
+
+- **"Config file not found..."** — run `npm run auth`.
+- **"Token file not found..."** — run `npm run auth`.
+- **"Calendar(s) not found..."** — the name(s) in your config don't
+  exactly match a calendar in your Google account (case-sensitive); the
+  error lists the calendars actually available so you can fix a typo.
+- Any other error is shown directly in the widget with a `⚠` prefix.
+
+## How it works
+
+This is a two-part build, mirroring the split between the old shell scripts
+and the CoffeeScript render layer, except both halves are now TypeScript:
+
+- **`src/cli/*.ts`** — a real Node CLI (`fetch-events.ts`) that loads
+  config, refreshes the OAuth token if needed, calls the Calendar API via
+  `googleapis`, sorts/formats events, and prints one JSON line to stdout.
+  Bundled by esbuild into `calendar.widget/lib/fetch-events.js`.
+- **`src/widget/index.tsx`** — the actual Übersicht widget entry
+  (`command`/`render`/`updateState`/`className`). It shells out to
+  `lib/fetch-events.js`, parses its JSON output, and renders the result.
+  Bundled by esbuild (JSX left untouched — Übersicht's own babel pass
+  transforms it at widget-load time) into `calendar.widget/index.jsx`.
+- **`src/setup/authorize.ts`** — the one-time interactive OAuth loopback
+  flow behind `npm run auth`. Bundled into `calendar.widget/lib/authorize.js`.
+
+Compiled output under `calendar.widget/lib/` and `calendar.widget/index.jsx`
+is build output, not committed to the repo (`.gitignore`d) — run
+`npm install && npm run build` to produce it.
+
+## Testing
+
+```sh
+npm run test        # vitest — sort/format logic, timezone day-boundary math, config validation
+npm run typecheck    # tsc --noEmit
+```
+
+## Legacy files
+
+This repo still contains the original CoffeeScript widget and its shell
+scripts (`calendar.widget/calendar.coffee`, `calendar.widget/assets/*.sh`,
+`clean.sh`, `gitPushOriginMaster.sh`, `calendar.widget.zip`, etc.) — they
+are no longer used by the TypeScript rewrite above and are slated for
+removal in a follow-up cleanup pass.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

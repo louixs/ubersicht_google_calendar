@@ -1,0 +1,29 @@
+{
+  "name": "ubersicht-google-calendar",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Übersicht widget that shows upcoming Google Calendar events",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "node esbuild.config.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "auth": "node esbuild.config.mjs --only=setup && node calendar.widget/lib/authorize.js",
+    "package": "npm run build && npm run test && zip -r ubersicht-google-calendar.widget.zip calendar.widget/index.jsx calendar.widget/lib calendar.widget/package.json -x '*.DS_Store'",
+    "postinstall": "npm run build"
+  },
+  "dependencies": {
+    "google-auth-library": "^9.0.0",
+    "googleapis": "^144.0.0",
+    "luxon": "^3.5.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/luxon": "^3.4.2",
+    "@types/node": "^20.14.0",
+    "esbuild": "^0.23.0",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}
