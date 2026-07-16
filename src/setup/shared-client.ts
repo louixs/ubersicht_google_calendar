@@ -11,8 +11,9 @@
  *
  * Per Google's "installed application" OAuth guidance (RFC 8252), this
  * client type's secret is not confidential — security comes from the
- * loopback redirect + PKCE, not from keeping the secret hidden. See
- * docs/oauth-shared-client-plan.md for the full rationale.
+ * loopback redirect + PKCE, not from keeping the secret hidden. See the
+ * README's "Escape hatch: baking in a shared client (for forks)" section
+ * for the full rationale and tradeoffs.
  */
 export const SHARED_CLIENT_ID: string | undefined =
   process.env.UBERSICHT_GCAL_CLIENT_ID || undefined;

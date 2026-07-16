@@ -6,13 +6,15 @@ import { dirname, resolve } from 'node:path';
 
 // The widget runs in Übersicht's WKWebView, which maps `fs` (and every
 // other Node builtin) to an EMPTY STUB — there is no real filesystem
-// access there (see esbuild.config.mjs widget target comment and
-// docs/drag-port-handoff.md, which documents the abandoned attempt to use
-// `fs` from this exact bundle). Any `fs` import in the built widget
-// bundle is either a hard failure or a silent no-op, so this asserts the
-// invariant directly on freshly built output — in the same spirit as the
-// credential-wiring checks around the cli/setup build targets — rather
-// than trusting that no one re-introduces it.
+// access there (see esbuild.config.mjs widget target comment; an earlier,
+// abandoned attempt to use `fs` from this exact bundle — a drag/reposition
+// port — ran into this and was replaced by the config.json-based
+// `position` field documented in the README's "Widget position" section).
+// Any `fs` import in the built widget bundle is either a hard failure or a
+// silent no-op, so this asserts the invariant directly on freshly built
+// output — in the same spirit as the credential-wiring checks around the
+// cli/setup build targets — rather than trusting that no one re-introduces
+// it.
 const repoRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const outfile = resolve(repoRoot, 'calendar.widget/index.jsx');
 

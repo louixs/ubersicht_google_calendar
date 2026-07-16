@@ -169,9 +169,12 @@ cap requires going through Google's verification process (a real
 homepage, a privacy policy, domain verification, a demo video, and a
 review that can take weeks) — this project does not do that, and baking
 in a shared client just moves that ceiling from "per Google Cloud
-project" to "per fork." For anything beyond a small, trusted group, the
-per-user BYO path in step 2 above is the only option that scales without
-touching Google's verification process.
+project" to "per fork." A shared client also means a single shared
+Calendar API quota across every user of that fork, not just a shared user
+cap — low risk at small scale, but worth knowing before you point a lot
+of users at one baked-in client. For anything beyond a small, trusted
+group, the per-user BYO path in step 2 above is the only option that
+scales without touching Google's verification process.
 
 Your own `config.json` `clientId`/`clientSecret` (the BYO path, step 2)
 always take precedence over any shared client baked into the build via
@@ -256,11 +259,10 @@ pnpm run typecheck    # tsc --noEmit
 
 ## Legacy files
 
-This repo still contains the original CoffeeScript widget and its shell
-scripts (`calendar.widget/calendar.coffee`, `calendar.widget/assets/*.sh`,
-`clean.sh`, `gitPushOriginMaster.sh`, `calendar.widget.zip`, etc.) — they
-are no longer used by the TypeScript rewrite above and are slated for
-removal in a follow-up cleanup pass.
+The original CoffeeScript widget and its shell scripts
+(`calendar.widget/calendar.coffee`, `calendar.widget/assets/*.sh`,
+`clean.sh`, `gitPushOriginMaster.sh`, `calendar.widget.zip`, etc.) have been
+removed — see git history before `dd81d49` if you need them.
 
 ## License
 

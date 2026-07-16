@@ -78,7 +78,8 @@ export function saveConfig(config: Config, path: string = getConfigPath()): void
 /**
  * Resolves the OAuth client ID/secret the cli/widget runtime uses to make
  * requests. Reads ONLY config.json — this is the single runtime source of
- * truth for credentials (see docs/oauth-shared-client-plan.md). It never
+ * truth for credentials (see README's "Escape hatch: baking in a shared
+ * client (for forks)" section). It never
  * falls back to a build-time shared client: that fallback exists only in
  * the setup path (resolveSetupClientCredentials() in
  * setup/resolve-setup-credentials.ts, used by `pnpm run auth`), which
