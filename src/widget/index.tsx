@@ -126,15 +126,34 @@ function renderDay(title: string, events: CalendarEvent[]) {
   );
 }
 
+// Position (config.json's `position`, falling back to DEFAULT_POSITION) is
+// applied per-render as an inline style rather than baked into `className`.
+// Übersicht's client calls `css(implementation.className)` exactly once at
+// widget creation/update, passing the export straight into emotion's css()
+// — it never invokes it as a function with the current state. `render`,
+// however, genuinely is re-invoked every tick, so per-tick position must
+// live here.
+function positionStyle(state: State) {
+  return { top: state.position.top, left: state.position.left };
+}
+
 function render(state: State) {
   if (state.status === 'loading') {
-    return <div className="cal">Loading…</div>;
+    return (
+      <div className="cal" style={positionStyle(state)}>
+        Loading…
+      </div>
+    );
   }
   if (state.status === 'error') {
-    return <div className="cal cal-error">⚠ {state.message}</div>;
+    return (
+      <div className="cal cal-error" style={positionStyle(state)}>
+        ⚠ {state.message}
+      </div>
+    );
   }
   return (
-    <div className="cal">
+    <div className="cal" style={positionStyle(state)}>
       {renderDay('-- Today -----', state.data.today)}
       {renderDay('-- Tomorrow --', state.data.tomorrow)}
     </div>
@@ -143,17 +162,19 @@ function render(state: State) {
 
 // Visual styling mirrors the original calendar.coffee's Stylus block
 // (font-family "hack", accent color #df740c, title color #ffe64d).
-// A function (not a plain string), because top/left now come from
-// per-render state — config.json's `position`, falling back to
-// DEFAULT_POSITION — rather than a fixed value baked in at module load.
-function className(state: State) {
-  return `
+// A plain string, not a function: Übersicht's client calls
+// `css(implementation.className)` exactly once, at widget creation and on
+// each `api.update`, and passes the export straight into emotion's `css()`
+// — it is never invoked with the current state. A function here gets its
+// source stringified by emotion instead of executed, producing an invalid
+// class and a blank-rendering widget ("Functions that are interpolated in
+// css calls will be stringified"). top/left are NOT baked in here because
+// they're config-driven and per-tick — see positionStyle()/render() above.
+const className = `
   font-family: Hack, "Andale Mono", Menlo, Monaco, Courier, "Helvetica Neue", Osaka, monospace;
   color: #df740c;
   font-weight: 100;
   font-size: 11px;
-  top: ${state.position.top};
-  left: ${state.position.left};
   line-height: 1.5;
 
   .cal-title {
@@ -175,7 +196,6 @@ function className(state: State) {
     display: inline-block;
   }
 `;
-}
 
 // ESM named exports, not `module.exports`: the widget bundle is emitted as
 // esm (see esbuild.config.mjs widget target comment) and `module` does not

@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 // `external`. Mock it so the module can be imported under vitest/node.
 vi.mock('uebersicht', () => ({ run: () => Promise.resolve('') }));
 
-const { initialState, updateState } = await import('../src/widget/index.js');
+const { initialState, updateState, className } = await import('../src/widget/index.js');
 
 const DEFAULT_POSITION = { top: '15%', left: '2%' };
 const CONFIGURED_POSITION = { left: '10%', top: '20%' };
@@ -52,5 +52,17 @@ describe('widget updateState — position', () => {
     const next = updateState({ output: 'not json' }, withConfigured);
     expect(next.position).toEqual(CONFIGURED_POSITION);
     expect(next.status).toBe('error');
+  });
+});
+
+describe('widget className', () => {
+  // Regression test: Übersicht's client calls `css(implementation.className)`
+  // exactly once (at widget creation and on api.update) and never re-invokes
+  // it with per-tick state. If className is a function, emotion stringifies
+  // its source instead of executing it, producing an invalid class and a
+  // blank-rendering widget. Position must instead be applied per-render via
+  // an inline style (see render()/positionStyle() in src/widget/index.tsx).
+  it('is exported as a static string, not a function', () => {
+    expect(typeof className).toBe('string');
   });
 });
