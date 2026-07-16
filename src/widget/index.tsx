@@ -1,15 +1,21 @@
 /**
  * Übersicht widget entry point. Built by esbuild (jsx: 'preserve',
- * platform: 'browser') into calendar.widget/index.jsx, then re-bundled
+ * platform: 'neutral', format: 'esm' — see esbuild.config.mjs widget
+ * target comment for why) into calendar.widget/index.jsx, then re-bundled
  * by Übersicht's own browserify+babel pass, which is what actually turns
  * the literal JSX below into calls against the ambient `html()` global
  * (see architecture note §0 fact #6 / src/widget/jsx.d.ts) — there is no
  * `react` import here, deliberately.
  *
- * `command` shells out to the compiled CLI bundle at lib/fetch-events.js
- * (cwd = this file's directory at runtime, per architecture note §0
- * fact #5 — no PWD-depth arithmetic needed). Übersicht's own
- * `runShellCommand` captures stdout on success and dispatches
+ * `command` shells out to the compiled CLI bundle at
+ * calendar.widget/lib/fetch-events.js. Übersicht always runs `command`
+ * with cwd = the widgets ROOT folder
+ * (`~/Library/Application Support/Übersicht/widgets/`), never this
+ * widget's own subfolder — confirmed via live smoke test against a
+ * second widget (tsushin.widget) on this machine. That's why the path
+ * below is built as `$PWD/calendar.widget/...` rather than a bare
+ * relative path. Übersicht's own `runShellCommand` captures stdout on
+ * success and dispatches
  * `UB/COMMAND_RAN` with `{output}`; `updateState` below parses that
  * single JSON line against the WidgetPayload contract fetch-events.ts
  * writes (see src/cli/types.ts / fetch-events.ts).
@@ -18,6 +24,24 @@ import { run } from 'uebersicht';
 
 // Matches the original calendar.coffee's `refreshFrequency: '30m'`.
 const REFRESH_MS = 30 * 60 * 1000;
+
+// Original hardcoded position. The widget runs in a WKWebView with no
+// filesystem access (Übersicht maps `fs` to an empty stub there — see
+// esbuild.config.mjs widget target comment), so this is the fallback used
+// whenever config.json has no (or an invalid) `position` set, not
+// something read from disk by the widget itself.
+const DEFAULT_POSITION: Position = { top: '15%', left: '2%' };
+
+type Position = { left: string; top: string };
+
+function isValidPosition(value: unknown): value is Position {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as Position).left === 'string' &&
+    typeof (value as Position).top === 'string'
+  );
+}
 
 type CalendarEvent = {
   id: string;
@@ -36,40 +60,52 @@ type WidgetError = {
   message: string;
 };
 
-type WidgetPayload = { ok: true; data: WidgetEventGroups } | { ok: false; error: WidgetError };
+type WidgetPayload = (
+  | { ok: true; data: WidgetEventGroups }
+  | { ok: false; error: WidgetError }
+) & { position?: Position };
 
-type State =
+type State = (
   | { status: 'loading' }
   | { status: 'ok'; data: WidgetEventGroups }
-  | { status: 'error'; message: string };
+  | { status: 'error'; message: string }
+) & { position: Position };
 
 type CommandEvent = { output?: string; error?: unknown };
 
 const refreshFrequency = REFRESH_MS;
 
-const command = () => run('node lib/fetch-events.js');
+const command = () => run('node --no-warnings "$PWD/calendar.widget/lib/fetch-events.js"');
 
-const initialState: State = { status: 'loading' };
+const initialState: State = { status: 'loading', position: DEFAULT_POSITION };
 
 function updateState(event: CommandEvent, prevState: State): State {
+  // Config-derived position carries forward across ticks: a tick with no
+  // (or an invalid) position — command error, malformed output, or a
+  // config that never set one — keeps whatever was last known instead of
+  // snapping back to DEFAULT_POSITION.
+  const position = prevState.position;
+
   if (event.error) {
-    return { status: 'error', message: String(event.error) };
+    return { status: 'error', message: String(event.error), position };
   }
 
   let payload: WidgetPayload;
   try {
     payload = JSON.parse(event.output ?? '');
   } catch {
-    return { status: 'error', message: 'Malformed output from fetch-events.js' };
+    return { status: 'error', message: 'Malformed output from fetch-events.js', position };
   }
 
   if (!payload || typeof payload !== 'object' || !('ok' in payload)) {
-    return { status: 'error', message: 'Malformed output from fetch-events.js' };
+    return { status: 'error', message: 'Malformed output from fetch-events.js', position };
   }
 
+  const nextPosition = isValidPosition(payload.position) ? payload.position : position;
+
   return payload.ok
-    ? { status: 'ok', data: payload.data }
-    : { status: 'error', message: payload.error.message };
+    ? { status: 'ok', data: payload.data, position: nextPosition }
+    : { status: 'error', message: payload.error.message, position: nextPosition };
 }
 
 function renderDay(title: string, events: CalendarEvent[]) {
@@ -107,13 +143,17 @@ function render(state: State) {
 
 // Visual styling mirrors the original calendar.coffee's Stylus block
 // (font-family "hack", accent color #df740c, title color #ffe64d).
-const className = `
+// A function (not a plain string), because top/left now come from
+// per-render state — config.json's `position`, falling back to
+// DEFAULT_POSITION — rather than a fixed value baked in at module load.
+function className(state: State) {
+  return `
   font-family: Hack, "Andale Mono", Menlo, Monaco, Courier, "Helvetica Neue", Osaka, monospace;
   color: #df740c;
   font-weight: 100;
   font-size: 11px;
-  top: 15%;
-  left: 2%;
+  top: ${state.position.top};
+  left: ${state.position.left};
   line-height: 1.5;
 
   .cal-title {
@@ -135,8 +175,12 @@ const className = `
     display: inline-block;
   }
 `;
+}
 
-module.exports = {
+// ESM named exports, not `module.exports`: the widget bundle is emitted as
+// esm (see esbuild.config.mjs widget target comment) and `module` does not
+// exist in that output.
+export {
   refreshFrequency,
   command,
   initialState,

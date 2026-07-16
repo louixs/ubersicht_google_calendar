@@ -191,6 +191,30 @@ explicitly. Day boundaries are computed with real timezone-aware date math
 UTC offsets (e.g. India's +5:30, Nepal's +5:45) — the old shell script's
 `sed`-based offset arithmetic could get this wrong.
 
+## Widget position
+
+By default the widget appears near the top-left of the screen (`top: 15%`,
+`left: 2%`, matching the original calendar.coffee). To move it, hand-edit
+`~/.config/ubersicht-google-calendar/config.json` and add a `position`
+object with CSS length strings:
+
+```json
+{
+  "position": { "top": "60%", "left": "40%" }
+}
+```
+
+`top`/`left` accept any CSS length (`%`, `px`, etc.). There's no in-app
+drag-to-reposition — the widget runs in a webview with no filesystem
+access, so config.json (edited by hand, read by the `command` process) is
+the only way to set it. A missing or malformed `position` is silently
+ignored and the widget falls back to the default position; it never
+breaks config validation or the widget itself.
+
+Changes take effect on the next widget refresh — choose **Refresh All
+Widgets** from Übersicht's menu bar icon, or wait for the next scheduled
+refresh (every 30 minutes).
+
 ## Troubleshooting
 
 The widget prints structured errors instead of failing silently:

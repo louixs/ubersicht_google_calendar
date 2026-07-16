@@ -28,16 +28,23 @@ import { AuthError, ConfigError, type WidgetPayload } from './types.js';
 async function main(): Promise<WidgetPayload> {
   const config = loadConfig();
 
-  const client = createAuthorizedClient(config);
-  const calendarClient = new CalendarClient(client);
+  // Loaded before the try/catch below so a configured position still
+  // reaches the widget even if auth/network fails afterward — see the
+  // WidgetPayload.position comment in types.ts.
+  try {
+    const client = createAuthorizedClient(config);
+    const calendarClient = new CalendarClient(client);
 
-  const now = DateTime.local();
-  const zone = config.timezoneOverride ?? now.zoneName ?? 'local';
+    const now = DateTime.local();
+    const zone = config.timezoneOverride ?? now.zoneName ?? 'local';
 
-  const rawEvents = await fetchTodayAndTomorrowEvents(calendarClient, config, now);
-  const data = formatEvents(rawEvents, zone, config.hour12, now);
+    const rawEvents = await fetchTodayAndTomorrowEvents(calendarClient, config, now);
+    const data = formatEvents(rawEvents, zone, config.hour12, now);
 
-  return { ok: true, data };
+    return { ok: true, data, position: config.position };
+  } catch (err) {
+    return { ...toPayload(err), position: config.position };
+  }
 }
 
 function toPayload(err: unknown): WidgetPayload {

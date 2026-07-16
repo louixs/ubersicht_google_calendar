@@ -44,19 +44,28 @@ const targets = {
   widget: {
     entryPoints: ['src/widget/index.tsx'],
     bundle: true,
-    platform: 'browser',
-    format: 'cjs',
+    platform: 'neutral',
+    // MUST stay 'esm'. The widget runs inside Übersicht's WKWebView, which
+    // Übersicht's server rebundles with browserify+babelify and maps `fs`
+    // (and every other node builtin) to an EMPTY STUB — there is no real
+    // filesystem access in this runtime, full stop. Widget code must never
+    // import 'fs'/'path'/'os' (proven by the abandoned drag-reposition
+    // port; see docs/handoff notes). Position now comes from config.json
+    // via the CLI command's JSON output instead. 'esm' is kept here only
+    // because it's the proven-working shape through Übersicht's pipeline —
+    // emitting cjs would transpile the remaining `import 'uebersicht'` into
+    // a `require()` before Übersicht's babel pass ever sees it.
+    format: 'esm',
     jsx: 'preserve',
+    // Left unbundled so the import statement survives to Übersicht's own
+    // babel+browserify pass: 'uebersicht' is its runtime helper, injected
+    // at widget-load time.
     external: ['uebersicht'],
     outfile: 'calendar.widget/index.jsx',
-    // The output is genuine CommonJS (Übersicht's own browserify pass
-    // `require()`s it as such — see architecture note §0 fact #2). The
-    // "module" global warning below is a false positive caused by the
-    // root package.json's "type": "module" leaking into esbuild's static
-    // analysis of the *input* file's package scope; it doesn't reflect
-    // how the *output* file is actually loaded (calendar.widget/ has its
-    // own package.json with "type": "commonjs").
-    logOverride: { 'commonjs-variable-in-esm': 'silent' },
+    // NOTE: a `logOverride` silencing 'commonjs-variable-in-esm' used to sit
+    // here, on the claim that the warning was a false positive. It was not —
+    // it was correctly flagging `module.exports` in an esm bundle, and
+    // silencing it hid a real breakage. Don't re-add it.
   },
 };
 
