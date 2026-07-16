@@ -6,7 +6,9 @@ import { describe, expect, it, vi } from 'vitest';
 // `external`. Mock it so the module can be imported under vitest/node.
 vi.mock('uebersicht', () => ({ run: () => Promise.resolve('') }));
 
-const { initialState, updateState, className } = await import('../src/widget/index.js');
+const { initialState, updateState, className, positionStyle } = await import(
+  '../src/widget/index.js'
+);
 
 const DEFAULT_POSITION = { top: '15%', left: '2%' };
 const CONFIGURED_POSITION = { left: '10%', top: '20%' };
@@ -52,6 +54,21 @@ describe('widget updateState — position', () => {
     const next = updateState({ output: 'not json' }, withConfigured);
     expect(next.position).toEqual(CONFIGURED_POSITION);
     expect(next.status).toBe('error');
+  });
+});
+
+describe('widget positionStyle', () => {
+  // Regression test: top/left alone have no effect in CSS unless `position`
+  // is also set to something other than the default `static`. See
+  // positionStyle() in src/widget/index.tsx for why `fixed` specifically
+  // (not `absolute`) is required.
+  it('sets position: fixed alongside the configured top/left', () => {
+    const state = { ...initialState, position: CONFIGURED_POSITION };
+    expect(positionStyle(state)).toEqual({
+      position: 'fixed',
+      top: CONFIGURED_POSITION.top,
+      left: CONFIGURED_POSITION.left,
+    });
   });
 });
 

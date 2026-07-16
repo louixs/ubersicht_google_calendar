@@ -133,8 +133,26 @@ function renderDay(title: string, events: CalendarEvent[]) {
 // — it never invokes it as a function with the current state. `render`,
 // however, genuinely is re-invoked every tick, so per-tick position must
 // live here.
+// `top`/`left` alone have no effect in CSS — they only apply once an
+// element's `position` is taken out of the default `static` flow. That's
+// why configuring an extreme position (e.g. { left: '20%', top: '30%' })
+// previously rendered fine but never visibly moved: nothing here ever set
+// `position`.
+//
+// Use `fixed`, not `absolute`. Übersicht's own wrapper (`contentEl`,
+// class="widget") is `position: absolute` (from main.css) but has no
+// explicit width/height, so it collapses to zero size. An `absolute` child
+// would resolve percentage top/left against that zero-size box and
+// effectively never move. `fixed` instead resolves against the viewport
+// (`#uebersicht`/`body`/`html` are explicitly 100% width/height in
+// main.css), so percentage offsets work regardless of the zero-size
+// ancestor chain. Do not "simplify" this back to `absolute`.
 function positionStyle(state: State) {
-  return { top: state.position.top, left: state.position.left };
+  return {
+    position: 'fixed' as const,
+    top: state.position.top,
+    left: state.position.left,
+  };
 }
 
 function render(state: State) {
@@ -206,5 +224,6 @@ export {
   initialState,
   updateState,
   render,
+  positionStyle,
   className,
 };
