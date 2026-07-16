@@ -1,6 +1,6 @@
 {
   "name": "ubersicht-google-calendar",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "description": "Übersicht widget that shows upcoming Google Calendar events",
   "license": "MIT",
