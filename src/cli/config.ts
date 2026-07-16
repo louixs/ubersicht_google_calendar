@@ -75,6 +75,30 @@ export function saveConfig(config: Config, path: string = getConfigPath()): void
   writeFileSync(path, `${JSON.stringify(config, null, 2)}\n`, { mode: 0o600 });
 }
 
+/**
+ * Resolves the OAuth client ID/secret the cli/widget runtime uses to make
+ * requests. Reads ONLY config.json — this is the single runtime source of
+ * truth for credentials (see docs/oauth-shared-client-plan.md). It never
+ * falls back to a build-time shared client: that fallback exists only in
+ * the setup path (resolveSetupClientCredentials() in
+ * setup/resolve-setup-credentials.ts, used by `pnpm run auth`), which
+ * persists whatever it resolves back into config.json so this function
+ * always has something to read afterward. Throws ConfigError with an
+ * actionable message if config.json has neither value.
+ */
+export function resolveClientCredentials(
+  config: Pick<Config, 'clientId' | 'clientSecret'>,
+): { clientId: string; clientSecret: string } {
+  if (config.clientId && config.clientSecret) {
+    return { clientId: config.clientId, clientSecret: config.clientSecret };
+  }
+
+  throw new ConfigError(
+    `No OAuth credentials in ${getConfigPath()} — run \`pnpm run auth\` to ` +
+      'authorize and save them.',
+  );
+}
+
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }

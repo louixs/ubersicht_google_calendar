@@ -10,7 +10,10 @@
     "build": "node esbuild.config.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "auth": "node esbuild.config.mjs --only=setup && node calendar.widget/lib/authorize.js",
+    "auth": "node esbuild.config.mjs --only=setup && node --no-warnings calendar.widget/lib/authorize.js",
+    "install-widget": "pnpm run build && rm -rf \"$HOME/Library/Application Support/Übersicht/widgets/calendar.widget\" && cp -R calendar.widget \"$HOME/Library/Application Support/Übersicht/widgets/\"",
+    "build:release": "bash -c 'set -a; [ -f .env.local ] && source .env.local; set +a; pnpm run build'",
+    "auth:release": "bash -c 'set -a; [ -f .env.local ] && source .env.local; set +a; pnpm run auth'",
     "package": "pnpm run build && pnpm run test && zip -r ubersicht-google-calendar.widget.zip calendar.widget/index.jsx calendar.widget/lib calendar.widget/package.json -x '*.DS_Store'",
     "postinstall": "pnpm run build"
   },

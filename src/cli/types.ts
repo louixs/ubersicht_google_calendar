@@ -5,8 +5,16 @@ import { z } from 'zod';
  * ~/.config/ubersicht-google-calendar/config.json
  */
 export const ConfigSchema = z.object({
-  clientId: z.string().min(1, 'clientId is required'),
-  clientSecret: z.string().min(1, 'clientSecret is required'),
+  // Your Google OAuth client. Populated either directly by you (the
+  // primary, bring-your-own-client path — README "2. Create your own
+  // Google OAuth client") or by `pnpm run auth` seeding it from a shared
+  // client baked into this build, if one exists (a fork-only escape
+  // hatch). Optional here only because authorize.ts writes calendarNames/
+  // hour12 to config.json before these are resolved — the cli/widget
+  // runtime (resolveClientCredentials() in cli/config.ts) requires both
+  // to be present and throws an actionable error otherwise.
+  clientId: z.string().min(1, 'clientId, if present, must not be empty').optional(),
+  clientSecret: z.string().min(1, 'clientSecret, if present, must not be empty').optional(),
   calendarNames: z
     .array(z.string().min(1))
     .min(1, 'calendarNames must contain at least one calendar name'),

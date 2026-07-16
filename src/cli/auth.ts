@@ -5,7 +5,7 @@ import { google } from 'googleapis';
 import type { OAuth2Client, Credentials } from 'google-auth-library';
 
 import { AuthError, TokenSetSchema, type Config, type TokenSet } from './types.js';
-import { getTokenPath } from './config.js';
+import { getTokenPath, resolveClientCredentials } from './config.js';
 
 export const CALENDAR_READONLY_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
 
@@ -57,7 +57,8 @@ export function createOAuth2Client(
   config: Pick<Config, 'clientId' | 'clientSecret'>,
   redirectUri?: string,
 ): OAuth2Client {
-  return new google.auth.OAuth2(config.clientId, config.clientSecret, redirectUri);
+  const { clientId, clientSecret } = resolveClientCredentials(config);
+  return new google.auth.OAuth2(clientId, clientSecret, redirectUri);
 }
 
 /**

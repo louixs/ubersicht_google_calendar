@@ -3,6 +3,10 @@ import * as esbuild from 'esbuild';
 
 const only = process.argv.find((arg) => arg.startsWith('--only='))?.split('=')[1];
 
+const hasSharedClient = Boolean(
+  process.env.UBERSICHT_GCAL_CLIENT_ID && process.env.UBERSICHT_GCAL_CLIENT_SECRET,
+);
+
 const targets = {
   setup: {
     entryPoints: ['src/setup/authorize.ts'],
@@ -12,6 +16,21 @@ const targets = {
     format: 'cjs',
     outfile: 'calendar.widget/lib/authorize.js',
     banner: { js: '#!/usr/bin/env node' },
+    // Inlines the maintainer's local shell env at build time (or an empty
+    // string if unset, e.g. in dev builds before a shared client exists).
+    // Only the setup/authorize bundle needs this: it's the only place a
+    // baked-in shared client can be used, and only to seed config.json
+    // during `pnpm run auth`. The cli/widget bundles read credentials from
+    // config.json only (resolveClientCredentials() in cli/config.ts) and
+    // have no dependency on this define block at all.
+    define: {
+      'process.env.UBERSICHT_GCAL_CLIENT_ID': JSON.stringify(
+        process.env.UBERSICHT_GCAL_CLIENT_ID ?? '',
+      ),
+      'process.env.UBERSICHT_GCAL_CLIENT_SECRET': JSON.stringify(
+        process.env.UBERSICHT_GCAL_CLIENT_SECRET ?? '',
+      ),
+    },
   },
   cli: {
     entryPoints: ['src/cli/fetch-events.ts'],
@@ -42,6 +61,14 @@ const targets = {
 };
 
 const selected = only ? [only] : Object.keys(targets);
+
+if (selected.includes('setup')) {
+  console.log(
+    hasSharedClient
+      ? 'Baked-in OAuth client: YES (shared client will be used; users are not prompted)'
+      : 'Baked-in OAuth client: NO (bring-your-own-client; users will be prompted on first auth)',
+  );
+}
 
 for (const name of selected) {
   const config = targets[name];

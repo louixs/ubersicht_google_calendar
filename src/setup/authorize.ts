@@ -3,9 +3,12 @@ import { exec } from 'node:child_process';
 import { URL } from 'node:url';
 import * as readline from 'node:readline/promises';
 
+import { CodeChallengeMethod } from 'google-auth-library';
+
 import { createOAuth2Client, saveToken, CALENDAR_READONLY_SCOPE } from '../cli/auth.js';
 import { getConfigPath, getTokenPath, loadConfig, saveConfig } from '../cli/config.js';
 import { ConfigError, type Config, type TokenSet } from '../cli/types.js';
+import { resolveSetupClientCredentials } from './resolve-setup-credentials.js';
 
 /**
  * One-time interactive OAuth loopback flow. Never invoked by Übersicht
@@ -14,7 +17,19 @@ import { ConfigError, type Config, type TokenSet } from '../cli/types.js';
  * by Google).
  */
 
+/**
+ * Fallback for local dev/testing (or maintainers/users who want an
+ * isolated OAuth client): only reached when resolveSetupClientCredentials()
+ * can't find a shared client baked into this build.
+ */
 async function promptForClientCredentials(): Promise<Pick<Config, 'clientId' | 'clientSecret'>> {
+  console.log(
+    'This build has no OAuth client baked in, so you need your own — that\'s the ' +
+      'normal, primary way to use this widget (each user registers their own free ' +
+      'Google Cloud OAuth client). Full step-by-step instructions, including the ' +
+      '"Publish app" step that keeps your refresh token from expiring every 7 ' +
+      'days, are in the README\'s "2. Create your own Google OAuth client" section.\n',
+  );
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   try {
     const clientId = (await rl.question('Google OAuth client ID: ')).trim();
@@ -44,25 +59,52 @@ async function promptForCalendarNames(): Promise<string[]> {
   }
 }
 
-/** Loads existing config if present, otherwise prompts and creates one. */
+/**
+ * Loads existing config if present, otherwise prompts for user-specific
+ * data (calendars, formatting) and creates one. Does NOT prompt for
+ * clientId/clientSecret unless the shared client baked into this build is
+ * unavailable — see resolveSetupClientCredentials() in
+ * setup/resolve-setup-credentials.ts.
+ *
+ * Whatever credentials get resolved (from an existing config, the
+ * baked-in shared client, or an interactive prompt) are always persisted
+ * into config.json before returning: the cli/widget runtime
+ * (resolveClientCredentials() in cli/config.ts) reads config.json only,
+ * so a successful `pnpm run auth` must always leave both clientId and
+ * clientSecret there, regardless of where they came from.
+ */
 async function loadOrCreateBaseConfig(): Promise<Config> {
+  let config: Config;
+  let isNew = false;
+
   try {
-    return loadConfig();
+    config = loadConfig();
   } catch (err) {
     if (!(err instanceof ConfigError)) throw err;
     console.log('No existing config found — let\'s set one up.\n');
-    const { clientId, clientSecret } = await promptForClientCredentials();
+    isNew = true;
+
     const calendarNames = await promptForCalendarNames();
-    const config: Config = {
-      clientId,
-      clientSecret,
+    config = {
       calendarNames: calendarNames.length > 0 ? calendarNames : ['primary'],
       hour12: true,
     };
-    saveConfig(config);
-    console.log(`\nSaved config to ${getConfigPath()}\n`);
-    return config;
   }
+
+  if (!config.clientId || !config.clientSecret) {
+    let credentials: Pick<Config, 'clientId' | 'clientSecret'>;
+    try {
+      credentials = resolveSetupClientCredentials(config);
+    } catch {
+      // No shared client baked into this build — fall back to prompting.
+      credentials = await promptForClientCredentials();
+    }
+    config = { ...config, ...credentials };
+    saveConfig(config);
+    console.log(isNew ? `\nSaved config to ${getConfigPath()}\n` : `\nUpdated config at ${getConfigPath()}\n`);
+  }
+
+  return config;
 }
 
 /**
@@ -129,16 +171,24 @@ async function main(): Promise<void> {
 
   const redirectUri = `http://127.0.0.1:${port}`;
   const oAuth2Client = createOAuth2Client(config, redirectUri);
+
+  // PKCE (RFC 7636): defense in depth now that the client secret is
+  // shared across every install of this widget. google-auth-library
+  // generates the verifier/challenge pair for us.
+  const { codeVerifier, codeChallenge } = await oAuth2Client.generateCodeVerifierAsync();
+
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
     prompt: 'consent',
     scope: [CALENDAR_READONLY_SCOPE],
     redirect_uri: redirectUri,
+    code_challenge: codeChallenge,
+    code_challenge_method: CodeChallengeMethod.S256,
   });
 
   const code = await runLoopbackFlow(authUrl, port);
 
-  const { tokens } = await oAuth2Client.getToken({ code, redirect_uri: redirectUri });
+  const { tokens } = await oAuth2Client.getToken({ code, redirect_uri: redirectUri, codeVerifier });
   if (!tokens.access_token || !tokens.refresh_token) {
     throw new Error(
       'Google did not return a refresh token. Revoke access at ' +
