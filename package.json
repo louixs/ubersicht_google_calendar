@@ -21,7 +21,7 @@
     "google-auth-library": "^9.0.0",
     "googleapis": "^144.0.0",
     "luxon": "^3.5.0",
-    "zod": "^3.23.8"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@types/luxon": "^3.4.2",
